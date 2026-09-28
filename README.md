@@ -56,7 +56,7 @@ dependencies. It was scaffolded from the GameHub starter kit
 | `js/app.js` | Boot and wiring |
 | `js/sim/` | **The rules**: a pure, seeded, deterministic simulation (no DOM) |
 | `js/data/` | **Every number and every word** the game uses: cells, threats, levels, guide |
-| `js/render/` | The canvas: map, procedural cell art, effects |
+| `js/render/` | The canvas: each level painted as its tissue, procedural cell art, effects |
 | `js/battle.js` | The battle screen: loop, touch input, HUD, tray, coaching, cards |
 | `js/screens.js` | Life map, loadout, Field Guide, Settings, naming |
 | `js/store.js` | Progress on this device: `immunedefense:v1`, migrations, export/import |

@@ -21,7 +21,7 @@
  * offline forever (LESSONS 1.4).
  */
 
-var CACHE = "immunedefense-b2";
+var CACHE = "immunedefense-b3";
 
 var SHELL = [
   "./",
@@ -45,6 +45,7 @@ var SHELL = [
   "./js/data/threats.js",
   "./js/render/palette.js",
   "./js/render/renderer.js",
+  "./js/render/scenes.js",
   "./js/render/sprites.js",
   "./js/sim/game.js",
   "./js/sim/map.js",

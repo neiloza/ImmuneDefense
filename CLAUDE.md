@@ -25,9 +25,22 @@ cause.** Say which one you have.
 
 ## Current status (as of 2026-09-28)
 
-**Build 2. The first playable slice, after a UI, graphics and animation
-pass.** Built from the design in [`docs/DESIGN.md`](./docs/DESIGN.md);
-nobody has played it on a real phone yet (see *Waiting on a human*).
+**Build 3. The first playable slice, after a UI, graphics and animation
+pass and a scene pass.** Built from the design in
+[`docs/DESIGN.md`](./docs/DESIGN.md); nobody has played it on a real phone
+yet (see *Waiting on a human*).
+
+Build 3 (scenes) painted each level as the tissue it defends, in
+`js/render/scenes.js`, chosen by `level.scene`: Cut is a skin cross-section
+(stratum corneum, epidermis with rete ridges, dermis with collagen, hair
+follicles with sebaceous glands, a sweat gland, fat lobules, a V-shaped cut
+that clots, scabs and closes); Flu is a bronchial wall (mucus blanket,
+three-tier ciliated epithelium on a basement membrane, capillary web,
+smooth muscle, a cartilage plate, alveoli as the "deeper lung"); Broken
+bone is an arm (striated muscle in fascicles, fascia, periosteum, compact
+cortex with osteons, marrow with fat cells, a jagged break that fills with
+hematoma and grows a callus). Vessels meander and branch capillaries but
+still pass through every opening tile. The sim is untouched.
 
 Build 2 (the polish pass) changed, on top of build 1:
 
@@ -270,6 +283,7 @@ leverage.
 | `js/data/levels.js` | The three levels, their phases and coaching, the life map |
 | `js/data/guide.js` | Field Guide terms |
 | `js/render/renderer.js` | Draws a game state onto the canvas |
+| `js/render/scenes.js` | Each level painted as its tissue: skin, airway, bone; vessels; the wound, lining and fracture |
 | `js/render/sprites.js` | Every cell and threat, drawn in code, plus the card symbols; `ICON_TYPES` |
 | `js/render/palette.js` | Reads the palette out of `css/tokens.css` |
 | `icons/source.svg` | The one icon source; `npm run icons` builds the rest |

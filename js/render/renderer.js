@@ -30,12 +30,16 @@
 
 import { CELLS, NEUTRALS } from "../data/cells.js";
 import { THREATS, ALARM } from "../data/threats.js";
-import { MAP_W, MAP_H, fractureCentre, isPlaceableTile } from "../sim/map.js";
+import { MAP_W, MAP_H, isPlaceableTile } from "../sim/map.js";
 import { isVisible, currentPhase } from "../sim/game.js";
 import { readPalette, mix, withAlpha } from "./palette.js";
 import {
   drawThing, drawInfected, drawFingerprint, roundRect,
 } from "./sprites.js";
+import {
+  paintScene, frameColor, drawFlow,
+  drawWound as sceneWound, drawLining as sceneLining, drawFracture as sceneFracture,
+} from "./scenes.js";
 
 const TAU = Math.PI * 2;
 const POP_SECONDS = 0.32;
@@ -120,7 +124,7 @@ export function createRenderer(canvas) {
     bg.height = Math.round(h * dpr);
     const g = bg.getContext("2d");
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    paintBackground(g, w, h);
+    paintBackground(g);
 
     // The hidden-threat glow, pre-rendered once: a soft red smudge.
     const R = Math.max(6, Math.round(tile * 0.6));
@@ -136,211 +140,12 @@ export function createRenderer(canvas) {
     gg.fillRect(0, 0, R * 2, R * 2);
   }
 
-  function paintBackground(g, w, h) {
-    const T = tile;
-    const rows = map.rows;
-    let seed = 1;
-    for (const ch of level.id) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
-    const rnd = () => {
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      return seed / 4294967296;
-    };
-
-    // Base tissue everywhere, lit softly from the top left.
-    const light = g.createLinearGradient(0, 0, w, h);
-    light.addColorStop(0, mix(pal.tissue, "#ffffff", 0.18));
-    light.addColorStop(0.5, pal.tissue);
-    light.addColorStop(1, mix(pal.tissue, pal.tissueShade, 0.55));
-    g.fillStyle = light;
-    g.fillRect(0, 0, w, h);
-
-    // Airway space (Flu): cool, pale, with strands of mucus.
-    for (let y = 0; y < MAP_H; y++) {
-      for (let x = 0; x < MAP_W; x++) {
-        if (rows[y][x] === ":") { g.fillStyle = pal.airway; g.fillRect(x * T, y * T, T + 1, T + 1); }
-      }
-    }
-    if (map.tiles.some((t) => t.ch === ":")) {
-      const airRows = map.tiles.filter((t) => t.ch === ":").map((t) => t.y);
-      const airBot = (Math.max(...airRows) + 1) * T;
-      const mist = g.createLinearGradient(0, 0, 0, airBot);
-      mist.addColorStop(0, withAlpha("#ffffff", 0.5));
-      mist.addColorStop(1, withAlpha("#ffffff", 0));
-      g.fillStyle = mist;
-      g.fillRect(0, 0, w, airBot);
-      g.strokeStyle = withAlpha(pal.allyOutline, 0.22);
-      g.lineWidth = 1.5;
-      for (let k = 0; k < 7; k++) {
-        const y0 = (0.6 + k * 0.62) * T;
-        g.beginPath();
-        for (let x = 0; x <= w; x += T / 3) g.lineTo(x, y0 + Math.sin(x / T * 1.7 + k) * T * 0.12);
-        g.stroke();
-      }
-      // Drifting motes, so the air reads as air.
-      g.fillStyle = withAlpha("#ffffff", 0.7);
-      for (let k = 0; k < 24; k++) {
-        g.beginPath(); g.arc(rnd() * w, rnd() * airBot, T * (0.02 + rnd() * 0.04), 0, TAU); g.fill();
-      }
-    }
-
-    // Tissue texture: faint cells with pale nuclei, like a stained slide.
-    for (let k = 0; k < 110; k++) {
-      const x = rnd() * w;
-      const y = rnd() * h;
-      const ch = rows[Math.min(MAP_H - 1, Math.floor(y / T))][Math.min(MAP_W - 1, Math.floor(x / T))];
-      if (ch !== "." && ch !== "K" && ch !== "V" && ch !== "O") continue;
-      const r = T * (0.18 + rnd() * 0.2);
-      const rot = rnd() * 3;
-      g.fillStyle = withAlpha(pal.tissueShade, 0.5);
-      g.beginPath(); g.ellipse(x, y, r, r * 0.8, rot, 0, TAU); g.fill();
-      g.fillStyle = withAlpha("#ffffff", 0.35);
-      g.beginPath(); g.ellipse(x - r * 0.25, y - r * 0.25, r * 0.45, r * 0.3, rot, 0, TAU); g.fill();
-      g.fillStyle = withAlpha(pal.allyNucleus, 0.12);
-      g.beginPath(); g.arc(x + r * 0.2, y, r * 0.28, 0, TAU); g.fill();
-    }
-
-    // Skin: layered bands across the S/W rows. The wound itself is drawn per
-    // frame, because it closes as the level heals.
-    const skinRows = [...new Set(map.tiles.filter((t) => t.ch === "S" || t.ch === "W").map((t) => t.y))];
-    if (skinRows.length) {
-      const top = Math.min(...skinRows) * T;
-      const bot = (Math.max(...skinRows) + 1) * T;
-      const sk = g.createLinearGradient(0, top, 0, bot);
-      sk.addColorStop(0, pal.skinDeep);
-      sk.addColorStop(0.2, pal.skin);
-      sk.addColorStop(1, mix(pal.skin, pal.tissue, 0.35));
-      g.fillStyle = sk;
-      g.fillRect(0, top, w, bot - top);
-      g.strokeStyle = withAlpha(pal.skinDeep, 0.6);
-      g.lineWidth = 1;
-      for (let k = 1; k < 4; k++) {
-        const yy = top + (bot - top) * (k / 4);
-        g.beginPath();
-        for (let x = 0; x <= w; x += T / 4) g.lineTo(x, yy + Math.sin(x / T * 2.1 + k) * T * 0.06);
-        g.stroke();
-      }
-      // A few hairs on the surface: unmistakably skin.
-      g.strokeStyle = withAlpha(pal.ink, 0.35);
-      g.lineWidth = Math.max(1, T * 0.04);
-      g.lineCap = "round";
-      for (let k = 0; k < 9; k++) {
-        const hx = rnd() * w;
-        if (map.wound.some((c) => hx > c.x * T - T * 0.3 && hx < (c.x + 1) * T + T * 0.3)) continue;
-        g.beginPath();
-        g.moveTo(hx, top + T * 0.05);
-        g.quadraticCurveTo(hx + T * 0.15, top - T * 0.15, hx + T * 0.32, top - T * 0.22);
-        g.stroke();
-      }
-      // A wavy boundary into the tissue below.
-      g.fillStyle = mix(pal.skin, pal.tissue, 0.35);
-      g.beginPath();
-      g.moveTo(0, bot);
-      for (let x = 0; x <= w; x += T / 4) g.lineTo(x, bot + Math.sin(x / T * 2.4) * T * 0.1 + T * 0.06);
-      g.lineTo(w, bot - 1);
-      g.lineTo(0, bot - 1);
-      g.fill();
-    }
-
-    // Bone (Broken bone): a thick horizontal band with a cortical edge and
-    // spongy texture. The fracture gap is drawn per frame.
-    const boneTiles = map.tiles.filter((t) => t.ch === "X" || t.ch === "F");
-    if (boneTiles.length) {
-      const top = Math.min(...boneTiles.map((t) => t.y)) * T;
-      const bot = (Math.max(...boneTiles.map((t) => t.y)) + 1) * T;
-      const bn = g.createLinearGradient(0, top, 0, bot);
-      bn.addColorStop(0, mix(pal.bone, "#ffffff", 0.3));
-      bn.addColorStop(0.5, pal.bone);
-      bn.addColorStop(1, mix(pal.bone, pal.boneShade, 0.45));
-      g.fillStyle = bn;
-      g.fillRect(0, top + T * 0.08, w, bot - top - T * 0.16);
-      g.strokeStyle = pal.boneShade;
-      g.lineWidth = Math.max(2, T * 0.1);
-      g.beginPath(); g.moveTo(0, top + T * 0.1); g.lineTo(w, top + T * 0.1); g.stroke();
-      g.beginPath(); g.moveTo(0, bot - T * 0.1); g.lineTo(w, bot - T * 0.1); g.stroke();
-      g.fillStyle = withAlpha(pal.boneShade, 0.55);
-      for (let k = 0; k < 40; k++) {
-        const x = rnd() * w;
-        const y = top + T * 0.3 + rnd() * (bot - top - T * 0.6);
-        g.beginPath(); g.ellipse(x, y, T * (0.06 + rnd() * 0.08), T * 0.05, rnd() * 3, 0, TAU); g.fill();
-      }
-      label(g, "Bone", T * 0.2, top + T * 0.45, T);
-    }
-
-    // Blood vessels: a tube down each column that holds V/O tiles.
-    for (let x = 0; x < MAP_W; x++) {
-      let run = null;
-      for (let y = 0; y <= MAP_H; y++) {
-        const ch = y < MAP_H ? rows[y][x] : null;
-        const isV = ch === "V" || ch === "O";
-        if (isV && !run) run = { y0: y };
-        if (!isV && run) { vessel(g, x, run.y0, y, T); run = null; }
-      }
-    }
-    // Openings: a gap in the inner wall, and a ring so players learn that
-    // this is where Responders arrive.
-    for (const o of map.openings) {
-      const px = o.x * T;
-      const py = o.y * T;
-      const inward = o.x < MAP_W / 2 ? 1 : -1;
-      g.fillStyle = pal.tissue;
-      g.fillRect(px + inward * T * 0.2 - (inward > 0 ? 0 : T * 0.14), py - T * 0.22, T * 0.14, T * 0.44);
-      g.strokeStyle = withAlpha(pal.allyOutline, 0.9);
-      g.lineWidth = Math.max(1.5, T * 0.06);
-      g.setLineDash([T * 0.1, T * 0.08]);
-      g.beginPath(); g.arc(px + inward * T * 0.32, py, T * 0.3, 0, TAU); g.stroke();
-      g.setLineDash([]);
-    }
-
-    // The bloodstream / goal band along the bottom.
-    const goal = map.tiles.filter((t) => t.ch === "B");
-    if (goal.length) {
-      const top = Math.min(...goal.map((t) => t.y)) * T;
-      const bl = g.createLinearGradient(0, top, 0, h);
-      bl.addColorStop(0, pal.vesselDark);
-      bl.addColorStop(0.35, pal.blood);
-      bl.addColorStop(1, pal.blood);
-      g.fillStyle = bl;
-      g.fillRect(0, top, w, h - top);
-      g.fillStyle = pal.vessel;
-      g.fillRect(0, top, w, Math.max(2, T * 0.1));
-      // Its label is drawn per frame, above the moving blood cells.
-    }
-
-    // Labels a first-time player needs.
-    if (map.wound.length) {
-      const wx = Math.max(...map.wound.map((t) => t.x)) + 1;
-      label(g, "Wound", wx * T + T * 0.1, T * 0.62, T);
-    }
-    if (map.tiles.some((t) => t.ch === ":")) label(g, "Airway", T * 0.2, T * 0.45, T);
-    if (map.lining.length) label(g, "Airway lining", T * 0.2, (map.liningTop - 0.42) * T, T);
-
-    // A vignette: the eye goes to the middle, where the fight is.
-    const vg = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.max(w, h) * 0.75);
-    vg.addColorStop(0, withAlpha(pal.ink, 0));
-    vg.addColorStop(1, withAlpha(pal.ink, 0.16));
-    g.fillStyle = vg;
-    g.fillRect(0, 0, w, h);
+  function env() {
+    return { pal, map, level, T: tile, w: tile * MAP_W, h: tile * MAP_H };
   }
 
-  function vessel(g, x, y0, y1, T) {
-    const cx = (x + 0.5) * T;
-    const halfW = T * 0.3;
-    // A tube: dark wall, blood, and a gloss stripe so it reads as round.
-    g.fillStyle = pal.vesselDark;
-    g.fillRect(cx - halfW, y0 * T, halfW * 2, (y1 - y0) * T);
-    const tube = g.createLinearGradient(cx - halfW, 0, cx + halfW, 0);
-    tube.addColorStop(0, pal.vesselDark);
-    tube.addColorStop(0.35, pal.blood);
-    tube.addColorStop(0.7, pal.blood);
-    tube.addColorStop(1, pal.vesselDark);
-    g.fillStyle = tube;
-    g.fillRect(cx - halfW * 0.7, y0 * T, halfW * 1.4, (y1 - y0) * T);
-    g.fillStyle = withAlpha("#ffffff", 0.16);
-    g.fillRect(cx - halfW * 0.45, y0 * T, halfW * 0.22, (y1 - y0) * T);
-    g.strokeStyle = pal.vessel;
-    g.lineWidth = Math.max(1.5, T * 0.07);
-    g.beginPath(); g.moveTo(cx - halfW, y0 * T); g.lineTo(cx - halfW, y1 * T); g.stroke();
-    g.beginPath(); g.moveTo(cx + halfW, y0 * T); g.lineTo(cx + halfW, y1 * T); g.stroke();
+  function paintBackground(g) {
+    paintScene(g, env());
   }
 
   function label(g, text, x, y, T, color) {
@@ -446,7 +251,7 @@ export function createRenderer(canvas) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Frame around the map.
-    ctx.fillStyle = mix(pal.tissueShade, pal.ink, 0.12);
+    ctx.fillStyle = frameColor(env());
     ctx.fillRect(0, 0, cssW, cssH);
 
     ctx.save();
@@ -470,7 +275,7 @@ export function createRenderer(canvas) {
     }
     drawWound(state);
     drawLining(state, t);
-    drawFracture(state, t);
+    drawFracture(state);
     drawBarracks(state, t);
     drawAlarmTint(state, t, ui.reducedMotion);
     drawHealZone(state, t);
@@ -531,163 +336,10 @@ export function createRenderer(canvas) {
     ctx.fill();
   }
 
-  function drawBloodFlow(t) {
-    const T = tile;
-    ctx.fillStyle = withAlpha(pal.rbc, 0.9);
-    // Down each vessel column.
-    for (let x = 0; x < MAP_W; x++) {
-      const cells = map.tiles.filter((c) => c.x === x && (c.ch === "V" || c.ch === "O"));
-      if (!cells.length) continue;
-      const y0 = Math.min(...cells.map((c) => c.y));
-      const y1 = Math.max(...cells.map((c) => c.y)) + 1;
-      const len = y1 - y0;
-      for (let k = 0; k < len * 1.2; k++) {
-        const yy = y0 + ((k / 1.2 + t * 0.9) % len);
-        ctx.beginPath();
-        ctx.ellipse((x + 0.5) * T + Math.sin(k * 3.1) * T * 0.06, yy * T, T * 0.1, T * 0.07, 0, 0, TAU);
-        ctx.fill();
-      }
-    }
-    // Along the bloodstream band.
-    if (map.goalY != null) {
-      for (let k = 0; k < 14; k++) {
-        const xx = ((k * 0.73 + t * 0.8) % MAP_W);
-        const yy = map.goalY + 0.35 + ((k * 37) % 5) / 9;
-        ctx.beginPath();
-        ctx.ellipse(xx * T, yy * T, T * 0.13, T * 0.09, 0, 0, TAU);
-        ctx.fill();
-      }
-    }
-  }
-
-  function drawWound(state) {
-    if (!map.wound.length) return;
-    const T = tile;
-    const xs = map.wound.map((c) => c.x);
-    const ys = map.wound.map((c) => c.y);
-    const x0 = Math.min(...xs) * T;
-    const x1 = (Math.max(...xs) + 1) * T;
-    const y0 = Math.min(...ys) * T;
-    const y1 = (Math.max(...ys) + 1) * T;
-    // The gap narrows as the Healing bar fills, and a scab crosses it.
-    const heal = level.healing ? state.healing / 100 : 0;
-    const cx = (x0 + x1) / 2;
-    const half = ((x1 - x0) / 2) * (1 - heal * 0.85);
-    const depth = ctx.createLinearGradient(0, y0, 0, y1 + T * 0.2);
-    depth.addColorStop(0, pal.clot);
-    depth.addColorStop(1, mix(pal.clot, pal.ink, 0.35));
-    ctx.fillStyle = depth;
-    ctx.beginPath();
-    ctx.moveTo(cx - half, y0);
-    for (let k = 0; k <= 8; k++) {
-      const yy = y0 + ((y1 - y0 + T * 0.2) * k) / 8;
-      ctx.lineTo(cx - half * (0.75 + 0.25 * Math.sin(k * 2.3)), yy);
-    }
-    for (let k = 8; k >= 0; k--) {
-      const yy = y0 + ((y1 - y0 + T * 0.2) * k) / 8;
-      ctx.lineTo(cx + half * (0.75 + 0.25 * Math.cos(k * 1.9)), yy);
-    }
-    ctx.closePath();
-    ctx.fill();
-    // Reddened, swollen edges.
-    ctx.strokeStyle = withAlpha(pal.tissueInflamed, 0.6);
-    ctx.lineWidth = Math.max(2, T * 0.12);
-    ctx.stroke();
-    if (heal > 0.02) {
-      ctx.fillStyle = withAlpha(pal.skinDeep, Math.min(1, heal * 1.4));
-      roundRect(ctx, cx - half - T * 0.1, y0, half * 2 + T * 0.2, T * 0.35 + heal * T * 0.4, T * 0.15);
-      ctx.fill();
-    }
-  }
-
-  function drawLining(state, t) {
-    if (!map.lining.length) return;
-    const T = tile;
-    for (const c of map.lining) {
-      const cell = state.lining[c.i];
-      const x = c.x * T;
-      const y = c.y * T;
-      if (cell.status === "dead") {
-        // A hole: grey, broken, and — while regrowing — a pink cell rising.
-        ctx.fillStyle = withAlpha(pal.liningDead, 0.9);
-        roundRect(ctx, x + T * 0.08, y + T * 0.08, T * 0.84, T * 0.84, T * 0.14);
-        ctx.fill();
-        ctx.strokeStyle = withAlpha(pal.ink, 0.25);
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x + T * 0.25, y + T * 0.3); ctx.lineTo(x + T * 0.5, y + T * 0.55); ctx.lineTo(x + T * 0.72, y + T * 0.35);
-        ctx.stroke();
-        if (cell.regrow > 0) {
-          const k = cell.regrow;
-          ctx.fillStyle = withAlpha(pal.lining, 0.9);
-          roundRect(ctx, x + T * (0.5 - 0.42 * k), y + T * (0.9 - 0.82 * k), T * 0.84 * k, T * 0.82 * k, T * 0.12);
-          ctx.fill();
-        }
-        continue;
-      }
-      // Healthy (or infected — the infected overlay is drawn with threats).
-      const g = ctx.createLinearGradient(x, y, x, y + T);
-      g.addColorStop(0, mix(pal.lining, "#ffffff", 0.25));
-      g.addColorStop(1, pal.lining);
-      ctx.fillStyle = g;
-      roundRect(ctx, x + T * 0.05, y + T * 0.04, T * 0.9, T * 0.92, T * 0.16);
-      ctx.fill();
-      ctx.strokeStyle = withAlpha(pal.allyOutline, 0.9);
-      ctx.lineWidth = Math.max(1, T * 0.04);
-      ctx.stroke();
-      ctx.fillStyle = withAlpha(pal.allyNucleus, 0.55);
-      ctx.beginPath();
-      ctx.ellipse(x + T * 0.5, y + T * 0.66, T * 0.16, T * 0.11, 0, 0, TAU);
-      ctx.fill();
-      // Cilia on the airway face, beating.
-      if (c.y === map.liningTop) {
-        ctx.strokeStyle = withAlpha(pal.allyOutline, 0.95);
-        ctx.lineWidth = Math.max(1, T * 0.035);
-        for (let k = 0; k < 5; k++) {
-          const bx = x + T * (0.15 + k * 0.175);
-          const sway = Math.sin(t * 5 + k + c.x) * T * 0.07;
-          ctx.beginPath();
-          ctx.moveTo(bx, y + T * 0.06);
-          ctx.quadraticCurveTo(bx + sway, y - T * 0.08, bx + sway * 1.6, y - T * 0.2);
-          ctx.stroke();
-        }
-      }
-    }
-  }
-
-  function drawFracture(state, t) {
-    const c = fractureCentre(map);
-    if (!c) return;
-    const T = tile;
-    const heal = state.healing / 100;
-    const cols = map.fracture.map((f) => f.x);
-    const x0 = Math.min(...cols) * T;
-    const x1 = (Math.max(...cols) + 1) * T;
-    const rowsY = map.fracture.map((f) => f.y);
-    const y0 = Math.min(...rowsY) * T + T * 0.08;
-    const y1 = (Math.max(...rowsY) + 1) * T - T * 0.08;
-    // A jagged gap full of clotted blood…
-    ctx.fillStyle = pal.hematoma;
-    ctx.beginPath();
-    ctx.moveTo(x0 + T * 0.1, y0);
-    for (let k = 0; k <= 6; k++) ctx.lineTo(x0 + T * (0.1 + 0.25 * ((k % 2) ? 1 : 0)), y0 + ((y1 - y0) * k) / 6);
-    for (let k = 6; k >= 0; k--) ctx.lineTo(x1 - T * (0.1 + 0.25 * ((k % 2) ? 0 : 1)), y0 + ((y1 - y0) * k) / 6);
-    ctx.closePath();
-    ctx.fill();
-    // …that callus (new bone) fills in from both sides as it heals.
-    if (heal > 0) {
-      const half = ((x1 - x0) / 2) * Math.min(1, heal * 1.05);
-      ctx.fillStyle = pal.callus;
-      ctx.fillRect(x0, y0, half, y1 - y0);
-      ctx.fillRect(x1 - half, y0, half, y1 - y0);
-      ctx.fillStyle = withAlpha(pal.boneShade, 0.6);
-      for (let k = 0; k < 6; k++) {
-        const yy = y0 + ((y1 - y0) * (k + 0.5)) / 6;
-        ctx.beginPath(); ctx.arc(x0 + half * 0.5, yy, T * 0.05, 0, TAU); ctx.fill();
-        ctx.beginPath(); ctx.arc(x1 - half * 0.5, yy, T * 0.05, 0, TAU); ctx.fill();
-      }
-    }
-  }
+  function drawBloodFlow(t) { drawFlow(ctx, env(), t); }
+  function drawWound(state) { sceneWound(ctx, env(), state); }
+  function drawLining(state, t) { sceneLining(ctx, env(), state, t); }
+  function drawFracture(state) { sceneFracture(ctx, env(), state); }
 
   function drawBarracks(state, t) {
     const b = level.barracks;

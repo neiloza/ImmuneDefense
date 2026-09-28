@@ -17,6 +17,8 @@
  *
  * `icon` names a sprite (js/render/sprites.js) that stands for the level or
  * the phase on cards and on the life map, so a card can show instead of tell.
+ * `scene` picks how the map is painted (js/render/scenes.js): the level looks
+ * like the tissue it defends — skin, airway, bone — not like a grid.
  *
  * IDs ARE PERMANENT. Progress is saved against level ids and phase ids.
  *
@@ -64,6 +66,7 @@ export const LEVELS = [
     age: 6,
     title: "Cut",
     icon: "bacterium",
+    scene: "skin",
     threatKind: "Outside injury",
     intro: "{name}, age 6, cuts a knee falling off a bike.",
     teaches: "Find the threat first, then send the right cells.",
@@ -168,6 +171,7 @@ export const LEVELS = [
     age: 7,
     title: "Flu",
     icon: "virus",
+    scene: "airway",
     threatKind: "A germ",
     intro: "{name}, age 7, catches the flu at school.",
     teaches: "Viruses hide inside your cells. The body must learn them.",
@@ -273,6 +277,7 @@ export const LEVELS = [
     age: 9,
     title: "Broken bone",
     icon: "debris",
+    scene: "bone",
     threatKind: "Inside damage",
     intro: "{name}, age 9, breaks an arm falling from a tree.",
     teaches: "Clean up, rebuild — and know when to stop inflammation.",

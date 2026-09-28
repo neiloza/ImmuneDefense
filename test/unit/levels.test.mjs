@@ -28,6 +28,7 @@ import { loadoutFor } from "../../scripts/balance.mjs";
 const WHERE = new Set(["wound", "top", "fracture", "bone", "pus", "deadTiles"]);
 const END_KEYS = new Set(["after", "spawnsDone", "cleared", "trained", "healed"]);
 const LEGEND = new Set([..."..:SWVOBAKXF"]);
+const SCENES = new Set(["skin", "airway", "bone"]);
 
 test("level ids are unique and every stage points at real levels", () => {
   const ids = LEVELS.map((l) => l.id);
@@ -41,6 +42,7 @@ for (const level of LEVELS) {
     const map = parseMap(level.map);
     for (const row of level.map) for (const ch of row) assert.ok(LEGEND.has(ch), `unknown map character "${ch}"`);
     assert.ok(map.openings.length > 0, "Responders need somewhere to arrive");
+    assert.ok(SCENES.has(level.scene), `${level.id}: unknown scene ${level.scene}`);
 
     for (const c of [...level.newCells, ...level.requiredCells]) assert.ok(CELLS[c], `unknown cell ${c}`);
     const avail = cellsAvailableAt(level.id);

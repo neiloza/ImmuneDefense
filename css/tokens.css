@@ -99,6 +99,24 @@
   --callus:          #e8dcc0;
   --node:            #b79ad6;
 
+  /* Scenes — each level is painted as the tissue it defends (js/render/
+   * scenes.js): a skin cross-section, a bronchial airway, an arm bone in
+   * muscle. */
+  --epidermis:       #e2ae97;
+  --corneum:         #f1d5c2;
+  --hair:            #4a3328;
+  --fat:             #f5e6bd;
+  --fat-line:        #dcc48c;
+  --mucus:           #dfe8f2;
+  --muscle:          #d98383;
+  --muscle-dark:     #b25a60;
+  --muscle-light:    #ecaaa6;
+  --fascia:          #f4e6de;
+  --cartilage:       #cfdbe0;
+  --cartilage-dark:  #9db2bd;
+  --marrow:          #f3dcae;
+  --alveoli:         #f0c9cb;
+
   /* Your cells: pale bodies with hematoxylin nuclei, like a blood smear. */
   --ally-body:       #fbf7ff;
   --ally-outline:    #b9a2d6;
