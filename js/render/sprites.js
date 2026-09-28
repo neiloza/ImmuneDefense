@@ -401,7 +401,7 @@ export function drawInfected(ctx, pal, x, y, size, t, seed, p = 0) {
   const swell = 1 + p * 0.06 + pulse * p * 0.04;
   const s = size * 0.92 * swell;
   roundRect(ctx, x - s / 2, y - s / 2, s, s, size * 0.2);
-  ctx.fillStyle = shaded(ctx, x, y, s * 0.7, mix(pal.lining, pal.enemy, 0.45 + 0.35 * pulse * p));
+  ctx.fillStyle = shaded(ctx, x, y, s * 0.7, mix(pal.lining, pal.enemyAlt, 0.4 + 0.3 * pulse * p));
   ctx.fill();
   ctx.strokeStyle = pal.enemyDark;
   ctx.lineWidth = Math.max(1, size * 0.05);
@@ -414,7 +414,8 @@ export function drawInfected(ctx, pal, x, y, size, t, seed, p = 0) {
 }
 
 export function drawDebris(ctx, pal, x, y, r, t, seed) {
-  ctx.strokeStyle = withAlpha("#3b2a20", 0.45);
+  // Pale chips, like bits of eggshell — never brown.
+  ctx.strokeStyle = withAlpha(INK, 0.22);
   ctx.lineWidth = Math.max(1, r * 0.1);
   ctx.lineJoin = "round";
   for (let k = 0; k < 3; k++) {
@@ -438,14 +439,16 @@ export function drawDebris(ctx, pal, x, y, r, t, seed) {
 }
 
 export function drawPus(ctx, pal, x, y, r, t, seed) {
+  // Spent Rushers: a soft cream puddle with a sleeping face. Tired, not gross.
   blob(ctx, x, y, r, t * 0.3, seed, 4, 0.1, 20);
-  outlineFill(ctx, shaded(ctx, x, y, r, pal.pus), withAlpha(pal.enemyAltDark, 0.5), Math.max(1, r * 0.08));
-  ctx.fillStyle = withAlpha(pal.allyNucleus, 0.45);
-  for (let k = 0; k < 3; k++) {
-    const a = seed * 13 + k * 2.2;
+  outlineFill(ctx, shaded(ctx, x, y, r, pal.pus), withAlpha(pal.enemyAltDark, 0.35), Math.max(1, r * 0.08));
+  ctx.strokeStyle = withAlpha(INK, 0.6);
+  ctx.lineWidth = Math.max(1, r * 0.1);
+  ctx.lineCap = "round";
+  for (const side of [-1, 1]) {
     ctx.beginPath();
-    ctx.arc(x + Math.cos(a) * r * 0.42, y + Math.sin(a) * r * 0.36, Math.max(1, r * 0.13), 0, TAU);
-    ctx.fill();
+    ctx.arc(x + side * r * 0.3, y - r * 0.05, r * 0.14, Math.PI * 0.15, Math.PI * 0.85);
+    ctx.stroke();
   }
   // A wet highlight.
   ctx.fillStyle = withAlpha("#ffffff", 0.5);

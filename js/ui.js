@@ -140,3 +140,18 @@ export function h(tag, props = {}, ...children) {
   }
   return el;
 }
+
+/* Copy with the important word marked: "Tap *Scout*, then tap the *ring*."
+ * Returns the text as nodes with each *marked* run wrapped in <b class="hl">,
+ * so a hint can point at the one word that matters without a single tag of
+ * markup reaching innerHTML. Text is user-safe by construction: the only
+ * thing that becomes an element is the highlight itself. */
+export function rich(text) {
+  const parts = String(text ?? "").split("*");
+  return parts.map((part, i) => (i % 2 ? h("b", { class: "hl", text: part }) : document.createTextNode(part)));
+}
+
+/* Set an element's content to rich text. */
+export function setRich(el, text) {
+  el.replaceChildren(...rich(text));
+}

@@ -13,7 +13,7 @@ import { LEVELS, STAGES, levelById, cellsAvailableAt, personalise } from "./data
 import { TERMS } from "./data/guide.js";
 import { drawIcon } from "./render/sprites.js";
 import { readPalette } from "./render/palette.js";
-import { h, openSheet, closeSheet, showView, toast } from "./ui.js";
+import { h, openSheet, closeSheet, showView, toast, rich } from "./ui.js";
 import {
   isUnlocked, cleanName, exportState, importState, defaultState, NAME_MAX,
 } from "./store.js";
@@ -110,6 +110,13 @@ export function createScreens(app) {
   function openLoadout(levelId) {
     const level = levelById(levelId);
     if (!level || !isUnlocked(app.state, levelId)) return;
+    // A tutorial level on first play goes straight in: it introduces its
+    // cells itself, one at a time, so a picker would be choosing between
+    // things the player has not met.
+    if (level.tutorial && !(app.state.progress[level.id]?.wins > 0)) {
+      app.startLevel(level.id, defaultPick(level));
+      return;
+    }
     const avail = CELL_ORDER.filter((c) => cellsAvailableAt(level.id).includes(c));
     const usable = avail.filter((c) => !uselessHere(level, c));
     const need = Math.min(level.slots, usable.length);
@@ -157,7 +164,8 @@ export function createScreens(app) {
           h("span", { class: "cell-meta" },
             h("span", { class: `pill pill-${kind.toLowerCase()}`, text: kind }),
             h("span", { class: "pill pill-cost", text: `${def.cost} Signal` }))),
-        h("p", { class: "cell-line", text: def.line }));
+        h("p", { class: "cell-head" }, ...rich(`*${def.verb}* ${def.what}`)),
+        h("p", { class: "cell-line", text: def.how }));
       }));
       count.textContent = `${pick.length} of ${level.slots} picked`;
       start.disabled = pick.length < need;
@@ -187,6 +195,7 @@ export function createScreens(app) {
   function guideEntries() {
     const cells = CELL_ORDER.map((id) => ({
       key: `cell:${id}`, type: id, name: CELLS[id].name, real: CELLS[id].realName,
+      head: `*${CELLS[id].verb}* ${CELLS[id].what}`,
       line: CELLS[id].job, realJob: CELLS[id].realJob,
       where: firstLevelWith((l) => l.newCells.includes(id)),
       rows: [["Kind", CELLS[id].kind === "sentry" ? "Sentry (stays put)" : "Aimed (goes where sent)"],
@@ -217,6 +226,7 @@ export function createScreens(app) {
     h("span", {},
       h("p", { class: "cell-name", text: known ? e.name : "???" }),
       h("p", { class: "cell-real", text: known ? e.real : `Meet it in ${e.where}` })),
+    known && e.head ? h("p", { class: "cell-head" }, ...rich(e.head)) : null,
     known ? h("p", { class: "cell-line", text: e.line }) : null);
   }
 
@@ -226,6 +236,7 @@ export function createScreens(app) {
       h("div", { class: "cell-tile is-required" },
         icon(e.type),
         h("span", {}, h("p", { class: "cell-name", text: e.name }), h("p", { class: "cell-real", text: e.real }))),
+      e.head ? h("p", { class: "cell-head guide-head" }, ...rich(e.head)) : null,
       h("p", { class: "guide-real-job" }, h("strong", { text: "In the game " }), e.line),
       h("p", { class: "guide-real-job" }, h("strong", { text: "In real life " }), e.realJob),
       e.rows.length ? h("dl", { class: "guide-row" }, ...e.rows.flatMap(([k, v]) => [h("dt", { text: k }), h("dd", { text: v })])) : null,

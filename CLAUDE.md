@@ -25,10 +25,33 @@ cause.** Say which one you have.
 
 ## Current status (as of 2026-09-28)
 
-**Build 3. The first playable slice, after a UI, graphics and animation
-pass and a scene pass.** Built from the design in
+**Build 4. The first playable slice, after polish, scene, and
+"make it kind" passes.** Built from the design in
 [`docs/DESIGN.md`](./docs/DESIGN.md); nobody has played it on a real phone
 yet (see *Waiting on a human*).
+
+Build 4 answered four notes from the owner:
+
+- **Not gross.** The body palette went pastel (`css/tokens.css`, with the
+  reasoning in its header): coral vessels, rose blood, salmon muscle, a soft
+  red clot, a lilac bruise, pale bone chips for debris, a cream puddle with
+  a sleeping face for pus. The sweat gland (it read as a worm) is gone, hair
+  is warm brown, the vignette is lighter, and soft motes drift up through
+  the tissue. Threats stay vivid; the body never is.
+- **A real tutorial.** Coach steps gained `hold` (the clock stops while the
+  step is up), `unlock` (the toolbar shows a cell only from that step on),
+  `done: { ok: true }` (a "Got it" button) and `expires`. Cut is
+  `tutorial: true`: it skips the loadout on first play and introduces
+  Scout → Devourer → Rusher one at a time, each met, placed and watched
+  working before the next appears; Flu and Broken bone pause to introduce
+  the Bounty Hunter and the Siren. Hints off = everything at once.
+- **Descriptions that land.** Every cell has `verb` + `what` (the headline,
+  "**Sees** hidden bacteria") and `how` ("Tap it, then tap a target.").
+  `*stars*` in any copy render as a highlight (`rich()` in `js/ui.js`).
+- **A toolbar, not a tray.** Bigger cards, a one-line strip above them that
+  always says what the chosen cell does and how to deploy it (or why a tap
+  was refused — those no longer toast), "?" slots for cells the tutorial
+  has not introduced yet.
 
 Build 3 (scenes) painted each level as the tissue it defends, in
 `js/render/scenes.js`, chosen by `level.scene`: Cut is a skin cross-section
@@ -88,13 +111,14 @@ Built and working in a desktop Chromium with a phone viewport:
   stages shown greyed), the loadout picker, the Field Guide (unlocks as you
   meet things), Settings (rename, sound, hints, backup/restore/reset, a
   tester switch that unlocks every level).
-- **Coaching** in all three levels, off with the Hints switch.
+- **Coaching** in all three levels, off with the Hints switch; Cut is a
+  held, one-cell-at-a-time tutorial (see Build 4 above).
 - **PWA:** installable, works offline, network-first worker, real icon set,
   strict CSP in `_headers`, build number in the UI.
 - **Tests:** 37 unit tests (every rule watched failing by
-  `scripts/mutation-check.mjs`, 23 mutations), a 61-check browser smoke
-  test that plays Cut to the end, deploy and docs pre-flights. `npm test`
-  is green.
+  `scripts/mutation-check.mjs`, 23 mutations), a 62-check browser smoke
+  test that plays the Cut tutorial's first steps by hand and the level to
+  the end, deploy and docs pre-flights. `npm test` is green.
 
 ### Difficulty, as measured by bots (2026-09-28, `npm run balance`, 20 seeds)
 
@@ -399,7 +423,7 @@ npm test                        # everything below except the last two
 node scripts/check-deploy.mjs   # production-only failure modes (121 checks)
 node scripts/check-docs.mjs     # doc links, anchors, this file map
 npm run test:unit               # 37 unit tests on the sim, data, copy and store (~1 s)
-npm run test:smoke              # the browser smoke test (61 checks, ~40 s)
+npm run test:smoke              # the browser smoke test (62 checks, ~40 s)
 npm run balance                 # difficulty report (not a test)
 node scripts/mutation-check.mjs # proves the unit tests can fail (~1 min)
 ```

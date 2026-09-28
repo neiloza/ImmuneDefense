@@ -84,9 +84,9 @@ function paintVessels(g, env, rnd) {
   for (const run of vesselRuns(env.map)) {
     const inward = run.col < MAP_W / 2 ? 1 : -1;
     // Capillaries branch off into the tissue before the tube goes on top.
-    g.strokeStyle = withAlpha(pal.rbc, 0.75);
+    g.strokeStyle = withAlpha(pal.vessel, 0.6);
     g.lineCap = "round";
-    for (let k = 0; k < 3; k++) {
+    for (let k = 0; k < 2; k++) {
       const y = run.y0 + 0.8 + rnd() * Math.max(0.5, run.y1 - run.y0 - 1.6);
       if (env.map.openings.some((o) => Math.floor(o.x) === run.col && Math.abs(o.y - y) < 0.7)) continue;
       const sx = vesselX(env, run.col, y) + inward * T * 0.28;
@@ -158,24 +158,41 @@ function paintBloodstream(g, env) {
 /* Cells in the blood: per frame, along every vessel and the bottom band. */
 export function drawFlow(ctx, env, t) {
   const { pal, T, map } = env;
-  ctx.fillStyle = withAlpha(pal.rbc, 0.9);
+  // Red blood cells as little dimpled discs: friendly, not gory.
+  const disc = (x, y, r) => {
+    ctx.fillStyle = withAlpha(pal.rbc, 0.95);
+    ctx.beginPath(); ctx.ellipse(x, y, r, r * 0.75, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = withAlpha("#ffffff", 0.35);
+    ctx.beginPath(); ctx.ellipse(x, y, r * 0.42, r * 0.3, 0, 0, TAU); ctx.fill();
+  };
   for (const run of vesselRuns(map)) {
     const len = run.y1 - run.y0;
     for (let k = 0; k < len * 1.2; k++) {
       const yy = run.y0 + ((k / 1.2 + t * 0.9) % len);
-      ctx.beginPath();
-      ctx.ellipse(vesselX(env, run.col, yy) + Math.sin(k * 3.1) * T * 0.05, yy * T, T * 0.1, T * 0.07, 0, 0, TAU);
-      ctx.fill();
+      disc(vesselX(env, run.col, yy) + Math.sin(k * 3.1) * T * 0.05, yy * T, T * 0.11);
     }
   }
   if (map.goalY != null && env.level.scene !== "airway") {
     for (let k = 0; k < 14; k++) {
       const xx = ((k * 0.73 + t * 0.8) % MAP_W);
       const yy = map.goalY + 0.3 + ((k * 37) % 5) / 8;
-      ctx.beginPath();
-      ctx.ellipse(xx * T, yy * T, T * 0.13, T * 0.09, 0, 0, TAU);
-      ctx.fill();
+      disc(xx * T, yy * T, T * 0.14);
     }
+  }
+}
+
+/* Soft motes drifting up through the tissue: the body is alive and well,
+ * and the calm before a wave should feel like something worth keeping. */
+export function drawAmbient(ctx, env, t) {
+  const { T, w, h } = env;
+  for (let k = 0; k < 12; k++) {
+    const x = ((k * 0.377 + Math.sin(t * 0.3 + k) * 0.02) % 1) * w;
+    const y = ((1 - ((t * 0.018 * (1 + (k % 3) * 0.4) + k * 0.61) % 1)) * h);
+    const a = 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(t * 1.7 + k * 2.1));
+    ctx.fillStyle = withAlpha("#ffffff", a);
+    ctx.beginPath();
+    ctx.arc(x, y, T * (0.035 + (k % 4) * 0.012), 0, TAU);
+    ctx.fill();
   }
 }
 
@@ -209,7 +226,7 @@ function vignette(g, env) {
   const { pal, w, h } = env;
   const vg = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.45, w / 2, h / 2, Math.max(w, h) * 0.75);
   vg.addColorStop(0, withAlpha(pal.ink, 0));
-  vg.addColorStop(1, withAlpha(pal.ink, 0.16));
+  vg.addColorStop(1, withAlpha(pal.ink, 0.09));
   g.fillStyle = vg;
   g.fillRect(0, 0, w, h);
 }
@@ -259,25 +276,6 @@ function paintSkin(g, env, rnd) {
     g.beginPath(); g.ellipse(x, y, r, r * 0.85, rnd() * 3, 0, TAU); g.fill(); g.stroke();
   }
 
-  // A sweat gland: a coiled tube deep in the dermis, its duct to the surface.
-  const gx = 7.1 * T;
-  const gy = 5.4 * T;
-  g.strokeStyle = withAlpha(pal.skinDeep, 0.75);
-  g.lineWidth = Math.max(1.5, T * 0.09);
-  g.lineCap = "round";
-  g.beginPath();
-  for (let a = 0; a < TAU * 3.2; a += 0.15) {
-    const r = T * (0.12 + a * 0.028);
-    const px = gx + Math.cos(a) * r;
-    const py = gy + Math.sin(a) * r * 0.8;
-    if (a === 0) g.moveTo(px, py); else g.lineTo(px, py);
-  }
-  g.stroke();
-  g.beginPath();
-  g.moveTo(gx + T * 0.4, gy - T * 0.2);
-  for (let y = gy - T * 0.2; y > 0; y -= T * 0.2) g.lineTo(gx + T * 0.4 + Math.sin(y / T * 4) * T * 0.08, y);
-  g.stroke();
-
   // Hair follicles: a sheath from deep in the dermis up through the skin, a
   // bulb at the bottom, a sebaceous gland at the side, and the hair itself.
   for (const fx of [1.55 * T, 7.55 * T]) {
@@ -293,7 +291,7 @@ function paintSkin(g, env, rnd) {
       g.beginPath(); g.ellipse(fx + T * (0.32 + k * 0.14), T * (1.35 + (k % 2) * 0.16), T * 0.13, T * 0.11, 0, 0, TAU); g.fill(); g.stroke();
     }
     g.strokeStyle = pal.hair;
-    g.lineWidth = Math.max(1.5, T * 0.07);
+    g.lineWidth = Math.max(1.2, T * 0.05);
     g.lineCap = "round";
     g.beginPath();
     g.moveTo(fx, depth - T * 0.1);
@@ -340,11 +338,11 @@ function paintSkin(g, env, rnd) {
     const xs = map.wound.map((c) => c.x);
     const cx = ((Math.min(...xs) + Math.max(...xs) + 1) / 2) * T;
     woundPath(g, T, cx, 1, 0);
-    g.fillStyle = mix(pal.tissue, pal.tissueInflamed, 0.35);
+    g.fillStyle = mix(pal.tissue, pal.tissueInflamed, 0.3);
     g.fill();
-    // Reddened, swollen edges.
-    g.strokeStyle = withAlpha(pal.tissueInflamed, 0.6);
-    g.lineWidth = Math.max(2, T * 0.14);
+    // A little pink around the edges, no more.
+    g.strokeStyle = withAlpha(pal.tissueInflamed, 0.5);
+    g.lineWidth = Math.max(2, T * 0.12);
     g.stroke();
   }
 
@@ -386,24 +384,20 @@ export function drawWound(ctx, env, state) {
   const open = 1 - heal * 0.88;
   woundPath(ctx, T, cx, open, 0);
   const g = ctx.createLinearGradient(0, 0, 0, T * 2.3);
-  g.addColorStop(0, pal.clot);
-  g.addColorStop(1, mix(pal.clot, pal.ink, 0.4));
+  g.addColorStop(0, mix(pal.clot, "#ffffff", 0.15));
+  g.addColorStop(1, mix(pal.clot, pal.ink, 0.12));
   ctx.fillStyle = g;
   ctx.fill();
-  // Fibrin strands in the clot.
-  ctx.strokeStyle = withAlpha("#ffffff", 0.14);
-  ctx.lineWidth = 1;
-  for (let k = 0; k < 4; k++) {
-    ctx.beginPath();
-    ctx.moveTo(cx - T * 0.7 * open + k * T * 0.35 * open, T * 0.2);
-    ctx.lineTo(cx - T * 0.1 + k * T * 0.07, T * (1.2 + k * 0.2) * open + T * 0.3);
-    ctx.stroke();
-  }
+  // A soft sheen, so the clot reads as smooth rather than raw.
+  ctx.fillStyle = withAlpha("#ffffff", 0.18);
+  ctx.beginPath();
+  ctx.ellipse(cx - T * 0.35 * open, T * 0.45, T * 0.3 * open, T * 0.14, -0.5, 0, TAU);
+  ctx.fill();
   if (heal > 0.02) {
-    // The scab: a dark crust across the top, thickening as it heals, with
-    // new pink skin creeping in beneath it from both edges.
+    // The scab: a warm brown crust across the top, thickening as it heals,
+    // with new pink skin creeping in beneath it from both edges.
     const half = T * 1.35 * open + T * 0.15;
-    ctx.fillStyle = withAlpha(mix(pal.clot, pal.ink, 0.45), Math.min(1, heal * 1.6));
+    ctx.fillStyle = withAlpha(mix(pal.clot, pal.hair, 0.6), Math.min(1, heal * 1.6));
     roundRect(ctx, cx - half, -T * 0.05, half * 2, T * (0.22 + heal * 0.2), T * 0.12);
     ctx.fill();
     ctx.fillStyle = withAlpha(pal.epidermis, Math.min(1, heal * 1.2));
@@ -448,9 +442,9 @@ function paintAirway(g, env, rnd) {
   lp.addColorStop(1, mix(pal.tissue, pal.tissueShade, 0.5));
   g.fillStyle = lp;
   g.fillRect(0, top, w, h - top);
-  g.strokeStyle = withAlpha(pal.rbc, 0.55);
-  g.lineWidth = Math.max(1, T * 0.04);
-  for (let k = 0; k < 7; k++) {
+  g.strokeStyle = withAlpha(pal.vessel, 0.4);
+  g.lineWidth = Math.max(1, T * 0.035);
+  for (let k = 0; k < 5; k++) {
     const y = memb + T * (0.25 + rnd() * 1.1);
     wavyLine(g, T * (0.9 + rnd() * 2), w, y, T * 0.12, (2 + rnd() * 2) / T, rnd() * 6, T / 5);
   }
@@ -501,12 +495,12 @@ function paintAirway(g, env, rnd) {
       const y = goalTop + rnd() * (h - goalTop);
       const r = T * (0.22 + rnd() * 0.22);
       g.fillStyle = withAlpha("#ffffff", 0.55);
-      g.strokeStyle = withAlpha(pal.rbc, 0.5);
+      g.strokeStyle = withAlpha(pal.vessel, 0.45);
       g.lineWidth = Math.max(1, T * 0.05);
       g.beginPath(); g.ellipse(x, y, r, r * 0.85, rnd() * 3, 0, TAU); g.fill(); g.stroke();
     }
     g.restore();
-    g.fillStyle = withAlpha(pal.rbc, 0.4);
+    g.fillStyle = withAlpha(pal.vessel, 0.35);
     g.fillRect(0, goalTop, w, Math.max(2, T * 0.06));
   }
 
@@ -619,7 +613,7 @@ function paintBone(g, env, rnd) {
     // Fibres: alternating light and dark striations inside the bundle.
     for (let k = 0; k < 7; k++) {
       const y = y0 + T * 0.12 + k * (fasc - T * 0.24) / 6;
-      g.strokeStyle = withAlpha(k % 2 ? pal.muscleDark : pal.muscleLight, 0.4);
+      g.strokeStyle = withAlpha(k % 2 ? pal.muscleDark : pal.muscleLight, 0.3);
       g.lineWidth = Math.max(1, T * 0.05);
       wavyLine(g, -T, w + T, y, T * 0.03, 1.3 / T, phase, T / 3);
     }
@@ -731,12 +725,12 @@ export function drawFracture(ctx, env, state) {
   for (let k = 8; k >= 0; k--) { const f = k / 8; ctx.lineTo(zig(f) + gap, y0 + (y1 - y0) * f); }
   ctx.closePath();
   const hg = ctx.createLinearGradient(0, y0, 0, y1);
-  hg.addColorStop(0, pal.hematoma);
-  hg.addColorStop(0.5, mix(pal.hematoma, pal.ink, 0.3));
-  hg.addColorStop(1, pal.hematoma);
+  hg.addColorStop(0, mix(pal.hematoma, "#ffffff", 0.1));
+  hg.addColorStop(0.5, mix(pal.hematoma, pal.ink, 0.12));
+  hg.addColorStop(1, mix(pal.hematoma, "#ffffff", 0.1));
   ctx.fillStyle = hg;
   ctx.fill();
-  ctx.strokeStyle = withAlpha(pal.ink, 0.35 * (1 - heal) + 0.05);
+  ctx.strokeStyle = withAlpha(pal.ink, 0.2 * (1 - heal) + 0.04);
   ctx.lineWidth = Math.max(1, T * 0.04);
   ctx.stroke();
 }
@@ -768,5 +762,5 @@ export function paintScene(g, env) {
 export function frameColor(env) {
   const { pal, level } = env;
   const base = level.scene === "bone" ? pal.muscleDark : level.scene === "skin" ? pal.skinDeep : pal.tissueShade;
-  return mix(base, pal.ink, 0.25);
+  return mix(base, pal.ink, 0.12);
 }

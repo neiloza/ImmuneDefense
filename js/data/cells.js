@@ -12,9 +12,14 @@
  * the cell is shown. Both strings live here so the tray, the loadout screen
  * and the Field Guide can never disagree.
  *
- * `line` (the tray and loadout), `job` (the Field Guide, in the game) and
- * `realJob` (the Field Guide, in real life) are TEN WORDS AT MOST, enforced
- * by test/unit/copy.test.mjs. A player skims; a paragraph is not read.
+ * The words, shortest first, because a player skims and a paragraph is not
+ * read (all TEN WORDS AT MOST, enforced by test/unit/copy.test.mjs):
+ *   verb + what   the headline everywhere — "Sees hidden bacteria" — with the
+ *                 verb set in bold so the one thing the cell DOES is the one
+ *                 thing the eye lands on
+ *   how           how to use it, one line ("Tap it, then tap a target.")
+ *   line          a fuller one-liner for the loadout and Field Guide tiles
+ *   job / realJob the Field Guide entry, in the game and in real life
  *
  * `id`s are PERMANENT. Saves and loadouts point at them (house rule: store
  * decisions, never content). Rename a cell by changing `name`, never `id`.
@@ -34,6 +39,9 @@ export const CELLS = {
     sampleRange: 1.3,      // touching distance for taking a Fingerprint
     carrySpeed: 1.6,       // tiles/s while walking a Fingerprint to the Barracks
     targets: [],
+    verb: "Sees",
+    what: "hidden bacteria",
+    how: "Place it near danger.",
     line: "Spots hidden threats nearby.",
     job: "Reveals hidden threats. Carries Fingerprints to the Barracks.",
     realJob: "Samples invaders and shows them to T cells.",
@@ -58,6 +66,9 @@ export const CELLS = {
     // hidden inside a living cell of Billy's own, which is exactly why the
     // body needs Bounty Hunters (docs/DESIGN.md, Flu level).
     targets: ["bacterium", "virus", "debris", "pus"],
+    verb: "Eats",
+    what: "what comes close",
+    how: "Place it. It stays put.",
     line: "Big, slow eater. Swallows what comes close.",
     job: "Eats bacteria, viruses, debris and pus near its post.",
     realJob: "Eats microbes and dead cells. Greek for “big eater”.",
@@ -79,6 +90,9 @@ export const CELLS = {
     // Siren is worth about 12" — where a rate would not be.
     alarm: 12,
     targets: [],
+    verb: "Raises",
+    what: "the Alarm",
+    how: "Place it. Retire it later.",
     line: "Raises the Alarm for faster Signal.",
     job: "Adds 12 Alarm while alive. Past 60, it hurts.",
     realJob: "Releases histamine, which drives inflammation and allergies.",
@@ -104,6 +118,9 @@ export const CELLS = {
     maxKills: 3,           // …or after this many kills, whichever is first
     leavesPus: true,       // every Rusher that dies becomes a blob of pus
     targets: ["bacterium", "virus", "debris"],
+    verb: "Chases",
+    what: "what you tap",
+    how: "Tap it, then tap a target.",
     line: "Cheap squad you aim. Dies after a few kills.",
     job: "Three per deploy. Dies after 3 kills, leaving pus.",
     realJob: "First to arrive; dies fighting. Pus is dead neutrophils.",
@@ -129,6 +146,9 @@ export const CELLS = {
     // Locked until the Barracks has trained against this Fingerprint.
     needsFingerprint: "flu",
     targets: ["infected"],
+    verb: "Hunts",
+    what: "infected cells",
+    how: "Tap it, then tap an infected cell.",
     line: "Aim at infected cells. Each kill makes a copy.",
     job: "Kills infected cells with its Fingerprint. Copies itself per kill.",
     realJob: "Kills infected cells showing its target, then multiplies.",

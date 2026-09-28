@@ -11,18 +11,18 @@
 
 const FALLBACK = {
   bg: "#fbf3f2", ink: "#24172b", inkSoft: "#58465f", accent: "#5b3690",
-  tissue: "#f4dcdc", tissueShade: "#ebc9ca", tissueInflamed: "#e88a8a",
-  skin: "#ecc3b2", skinDeep: "#d9a08f", clot: "#8e2a35",
-  vessel: "#c0405a", vesselDark: "#8a2238", blood: "#a82a3c", rbc: "#d9485a",
+  tissue: "#f4dcdc", tissueShade: "#ebc9ca", tissueInflamed: "#f0a3a0",
+  skin: "#f2cdbc", skinDeep: "#e5b3a0", clot: "#d9707a",
+  vessel: "#e07a8a", vesselDark: "#c9667a", blood: "#ea8f9c", rbc: "#f6b6bf",
   airway: "#eef1f6", lining: "#e7c2d2", liningDead: "#c9b7ba",
-  bone: "#f3ecda", boneShade: "#d8ccb0", hematoma: "#7a2230", callus: "#e8dcc0",
+  bone: "#f3ecda", boneShade: "#d8ccb0", hematoma: "#c98090", callus: "#ece1c8",
   node: "#b79ad6",
-  epidermis: "#e2ae97", corneum: "#f1d5c2", hair: "#4a3328", fat: "#f5e6bd", fatLine: "#dcc48c",
-  mucus: "#dfe8f2", muscle: "#d98383", muscleDark: "#b25a60", muscleLight: "#ecaaa6", fascia: "#f4e6de",
+  epidermis: "#edc2ad", corneum: "#f6dfd0", hair: "#8a6350", fat: "#f9edd6", fatLine: "#e9d9b6",
+  mucus: "#e3ecf5", muscle: "#f0b3a9", muscleDark: "#dc9490", muscleLight: "#f8d0c7", fascia: "#f8ece6",
   cartilage: "#cfdbe0", cartilageDark: "#9db2bd", marrow: "#f3dcae", alveoli: "#f0c9cb",
   allyBody: "#fbf7ff", allyOutline: "#b9a2d6", allyNucleus: "#6b3fa0", builder: "#ead7ad",
   enemy: "#9bcb3b", enemyDark: "#5a7d1c", enemyAlt: "#e0a526", enemyAltDark: "#9a6a0e",
-  debris: "#a38f7a", pus: "#e8dc9a",
+  debris: "#d8cab6", pus: "#f4ecc8",
   signal: "#3a7bd5", alarm: "#d6453d", heal: "#3f9a6b", good: "#2c6349", bad: "#9a2e36",
 };
 

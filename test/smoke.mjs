@@ -35,7 +35,7 @@ import { serve } from "./serve.mjs";
 
 /* A floor, not a total: a run that dies half way still prints a tally, and
  * "41/44 passed" reads almost exactly like a healthy run (LESSONS 7.1). */
-const EXPECTED_CHECKS = 61;
+const EXPECTED_CHECKS = 62;
 
 const results = [];
 function check(name, pass, detail = "") {
@@ -208,20 +208,19 @@ try {
   /* ======================================================================
    * A battle
    * ==================================================================== */
-  console.log("\nloadout");
+  console.log("\nthe tutorial");
   await page.locator(".level-card:not([disabled])").first().click();
-  check("the loadout opens for Cut", await until(page, () => !document.getElementById("loadout-sheet").hidden));
-  check("it offers the three starting cells, all picked",
-    (await page.locator("#loadout-body .cell-tile").count()) === 3 &&
-    (await page.locator("#loadout-body .cell-tile.is-picked").count()) === 3);
-  await page.locator("#loadout-body .cell-tile").nth(2).click();
-  check("un-picking a cell blocks Start", await page.locator(".loadout-start").isDisabled());
-  await page.locator("#loadout-body .cell-tile").nth(2).click();
-  await page.click(".loadout-start");
-  check("the battle opens on the intro card", await until(page, () => window.__immune?.card === "intro"));
+  check("Cut skips the loadout on first play and opens on the intro card",
+    await until(page, () => window.__immune?.card === "intro" && document.getElementById("loadout-sheet").hidden));
   check("the intro names the person", (await page.locator("#battle-card").textContent()).includes("Jill, age 6"));
   await page.click("#card-go");
   check("Begin starts the calm phase", await until(page, () => window.__immune.card === null && window.__immune.game.mode === "calm"));
+  check("the toolbar shows only the Scout at first", await until(page, () =>
+    document.querySelectorAll(".tray-cell:not(.is-upcoming)").length === 1 &&
+    document.querySelector(".tray-cell:not(.is-upcoming)").dataset.cell === "scout"));
+  check("the first tip holds the clock and waits for Got it", await until(page, () =>
+    !document.getElementById("coach-ok").hidden && window.__immune.game.t === 0));
+  await page.click("#coach-ok");
 
   const painted = await page.evaluate(() => {
     const c = document.getElementById("battle-canvas");
@@ -239,6 +238,9 @@ try {
   let p = await at(4.5, 5.5);
   await page.mouse.click(p.x, p.y);
   check("tap tray, tap map: a Scout is placed", await until(page, () => window.__immune.game.units.some((u) => u.type === "scout")));
+  check("the Devourer unlocks once the Scout is placed", await until(page, () =>
+    document.querySelector('.tray-cell[data-cell="devourer"]:not(.is-upcoming)') && !document.getElementById("coach-ok").hidden));
+  await page.click("#coach-ok");
 
   // Drag-deploy: press on the tray, move onto the map, let go.
   const tray = await page.locator('.tray-cell[data-cell="devourer"]').boundingBox();
@@ -251,12 +253,12 @@ try {
   check("drag from the tray onto the map: a Devourer is placed", await until(page,
     () => window.__immune.game.units.some((u) => u.type === "devourer" && Math.abs(u.postY - 3.5) < 0.01)));
 
-  // A tap on terrain refuses, with a reason.
+  // A tap on terrain refuses, with a reason in the toolbar's strip.
   await page.click('.tray-cell[data-cell="scout"]');
   p = await at(0.5, 7.5);
   await page.mouse.click(p.x, p.y);
   check("a Sentry on a vessel is refused, and says why",
-    await until(page, () => /open tissue/.test(document.getElementById("toast").textContent)));
+    await until(page, () => /open tissue/.test(document.getElementById("tray-strip").textContent)));
 
   console.log("\nsheets");
   await page.click("#hud-pause");
@@ -318,6 +320,9 @@ try {
   check("Flu offers the Bounty Hunter as needing training",
     /Needs training|New/.test(await page.locator("#loadout-body").textContent()) &&
     (await page.locator("#loadout-body .cell-tile").count()) === 4);
+  await page.locator("#loadout-body .cell-tile").nth(0).click();
+  check("un-picking a cell blocks Start", await page.locator(".loadout-start").isDisabled());
+  await page.locator("#loadout-body .cell-tile").nth(0).click();
   await page.keyboard.press("Escape");
   check("the life map shows the win", (await page.locator(".level-card .level-stars .on").count()) >= 1);
   check("the Field Guide learned what was met",

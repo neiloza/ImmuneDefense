@@ -36,7 +36,7 @@ import {
 } from "./sim/game.js";
 import { createRenderer } from "./render/renderer.js";
 import { drawIcon } from "./render/sprites.js";
-import { h, toast, openSheet, closeSheet, topSheet } from "./ui.js";
+import { h, toast, openSheet, closeSheet, topSheet, rich, setRich } from "./ui.js";
 import { playEvents, alarmPulse, unlockAudio } from "./audio.js";
 import { markSeen } from "./store.js";
 
@@ -53,12 +53,12 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     alarmBlock: $("alarm-block"), alarmMeter: $("alarm-meter"), alarmFill: $("alarm-fill"), alarmNum: $("alarm-num"),
     healBlock: $("heal-block"), healMeter: $("heal-meter"), healFill: $("heal-fill"), healNum: $("heal-num"), healName: $("heal-name"),
     calmBar: $("calm-bar"), calmText: $("calm-text"), calmStart: $("calm-start"),
-    coach: $("coach"), coachText: $("coach-text"),
+    coach: $("coach"), coachText: $("coach-text"), coachOk: $("coach-ok"),
     banner: $("banner"), bannerKicker: $("banner-kicker"), bannerTitle: $("banner-title"), bannerSub: $("banner-sub"),
     info: $("info-pop"), infoIcon: $("info-icon"), infoName: $("info-name"), infoReal: $("info-real"),
     infoLine: $("info-line"), infoRetire: $("info-retire"), infoClose: $("info-close"),
     signalBar: $("signal-bar"), signalFill: $("signal-fill"), signalNum: $("signal-num"),
-    tray: $("tray"), cardWrap: $("card-wrap"), card: $("battle-card"),
+    tray: $("tray"), trayStrip: $("tray-strip"), cardWrap: $("card-wrap"), card: $("battle-card"),
     pauseSound: $("pause-sound"), pausePhase: $("pause-phase"),
   };
   const renderer = createRenderer(el.canvas);
@@ -90,7 +90,10 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     box: null,
     reducedMotion,
   };
-  const coach = { index: 0, shownAt: 0, baseline: {}, events: new Set() };
+  const coach = { index: 0, shownAt: 0, baseline: {}, events: new Set(), acked: new Set() };
+  let coachNow = null;           // the step on screen this frame (null: none)
+  let stripMsg = null;           // a message in the toolbar's strip, if any
+  let stripTimer = 0;
 
   /* ---- lifecycle ---------------------------------------------------------- */
 
@@ -110,6 +113,9 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     coach.shownAt = 0;
     coach.baseline = {};
     coach.events = new Set();
+    coach.acked = new Set();
+    coachNow = null;
+    stripMsg = null;
     for (const k of Object.keys(hud)) delete hud[k];
 
     // The Field Guide learns the words this level's HUD uses the moment it
@@ -163,8 +169,15 @@ export function createBattle({ app, onExit, onOpenGuide }) {
 
   /* ---- the frame ------------------------------------------------------------ */
 
+  /* A tutorial step with `hold` stops the clock: the map freezes while the
+   * player reads and acts, and deploys still work (the sim takes commands
+   * without ticking). The bots never see the coach, so this is UI-only. */
+  function held() {
+    return !!(coachNow && coachNow.hold);
+  }
+
   function running() {
-    return game && !paused && !cardKind && (game.mode === "calm" || game.mode === "phase");
+    return game && !paused && !cardKind && !held() && (game.mode === "calm" || game.mode === "phase");
   }
 
   function frame(now) {
@@ -326,8 +339,16 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       el.signalBar.setAttribute("aria-valuenow", String(v));
     });
 
-    const calm = game.mode === "calm" && !cardKind;
+    const calm = game.mode === "calm" && !cardKind && !held();
     set("calmShown", calm, (v) => { el.calmBar.hidden = !v; });
+
+    // The toolbar's strip: what the selected cell does and how to deploy it,
+    // or a message about the card just tapped.
+    // A message (a refusal, a lock) wins over the standing "how to deploy"
+    // line, or a refused tap would never be explained.
+    // Always one line tall, so choosing a cell never resizes the map above.
+    const strip = stripMsg || (ui.placing ? placingStrip(ui.placing) : "Tap a cell to see what it does.");
+    set("strip", strip, (v) => { setRich(el.trayStrip, v); });
     if (calm) set("calmLeft", Math.ceil(game.calmLeft), (v) => { el.calmText.textContent = `Threat in ${Math.max(0, v)}s`; });
 
     updateTray();
@@ -357,7 +378,8 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       icon,
       h("span", { class: "tray-name", text: def.name }),
       h("span", { class: "tray-real", text: def.realName }),
-      h("span", { class: "tray-lock", hidden: true }));
+      h("span", { class: "tray-lock", hidden: true }),
+      h("span", { class: "tray-soon", "aria-hidden": "true" }, h("b", { text: "?" }), h("small", { text: "Soon" })));
       el.tray.append(btn);
       wireTrayButton(btn, id);
       requestAnimationFrame(() => drawIcon(icon, renderer.palette, id));
@@ -382,9 +404,12 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       const lock = trayLock(id);
       const poor = game.signal + 1e-9 < def.cost;
       const hint = coachCell === id;
-      const key = `${id}:${lock}:${poor}:${ui.placing === id}:${hint}`;
+      const soon = !unlockedCell(id);
+      const key = `${id}:${lock}:${poor}:${ui.placing === id}:${hint}:${soon}`;
       if (btn.dataset.key === key) continue;
       btn.dataset.key = key;
+      btn.classList.toggle("is-upcoming", soon);
+      btn.setAttribute("aria-label", soon ? "A cell you have not met yet" : `${def.name} (${def.realName}), costs ${def.cost} Signal`);
       btn.classList.toggle("is-locked", !!lock);
       btn.classList.toggle("is-poor", poor && !lock);
       btn.classList.toggle("is-selected", ui.placing === id);
@@ -396,10 +421,34 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     }
   }
 
+  /* In a tutorial, a cell joins the toolbar only when the coach introduces
+   * it (a step with `unlock`). With hints off, everything is there at once. */
+  function unlockedCell(id) {
+    const steps = coachSteps();
+    const at = steps.findIndex((s) => s.unlock === id);
+    if (at < 0 || coach.index > at) return true;
+    // The pointer can sit on a step that is not yet showing (its phase has
+    // not started); the card unlocks only once the step is on screen.
+    return coach.index === at && !!coachNow && coachNow.id === steps[at].id;
+  }
+
+  function showStrip(msg, ms = 3000) {
+    stripMsg = msg;
+    clearTimeout(stripTimer);
+    stripTimer = setTimeout(() => { stripMsg = null; }, ms);
+  }
+
+  function placingStrip(id) {
+    const def = CELLS[id];
+    const how = def.kind === "sentry" ? "Tap the map to place it." : "Tap a target on the map.";
+    return `*${def.verb}* ${def.what}. ${how}`;
+  }
+
   function selectTrayCell(id) {
+    if (!unlockedCell(id)) { showStrip("You'll meet this cell soon."); return; }
     const lock = trayLock(id);
     if (lock) {
-      toast(lockExplanation(id, lock));
+      showStrip(lockExplanation(id, lock));
       return;
     }
     ui.placing = ui.placing === id ? null : id;
@@ -428,7 +477,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       if (!game || cardKind) return;
       try { btn.setPointerCapture(e.pointerId); } catch { /* fine */ }
       drag = { id: e.pointerId, x: e.clientX, y: e.clientY, wasPlacing: ui.placing === id, moved: false };
-      if (!trayLock(id) && ui.placing !== id) selectTrayCell(id);
+      if (!trayLock(id) && unlockedCell(id) && ui.placing !== id) selectTrayCell(id);
     });
     btn.addEventListener("pointermove", (e) => {
       if (!drag || e.pointerId !== drag.id) return;
@@ -447,7 +496,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
         return;
       }
       // A plain tap: toggle. (pointerdown already selected an unselected cell.)
-      if (trayLock(id)) { selectTrayCell(id); return; }
+      if (trayLock(id) || !unlockedCell(id)) { selectTrayCell(id); return; }
       if (d.wasPlacing) { ui.placing = null; ui.ghost = null; }
     };
     btn.addEventListener("pointerup", (e) => finish(e, false));
@@ -504,7 +553,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       "occupied": "Already taken.",
       "needs-training": lockExplanation(id, trayLock(id) || "Needs training"),
     }[res.reason];
-    if (why) toast(why);
+    if (why) showStrip(why);
     return false;
   }
 
@@ -621,7 +670,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     el.info.hidden = false;
     el.infoName.textContent = name;
     el.infoReal.textContent = real;
-    el.infoLine.textContent = line;
+    setRich(el.infoLine, line);
     el.infoRetire.hidden = !retireable;
     drawIcon(el.infoIcon, renderer.palette, iconType);
   }
@@ -629,8 +678,8 @@ export function createBattle({ app, onExit, onOpenGuide }) {
   function showUnitInfo(u) {
     const def = CELLS[u.type] || NEUTRALS[u.type];
     const line = u.type === "siren" && level.alarm
-      ? `Adds ${CELLS.siren.alarm} Alarm while alive. Retire to lower it.`
-      : (def.line || def.job || "");
+      ? `Adds *${CELLS.siren.alarm} Alarm* while alive. Retire to lower it.`
+      : def.verb ? `*${def.verb}* ${def.what}.` : (def.line || def.job || "");
     showInfo("unit", u.id, u.type, def.name, def.realName, line, u.kind === "sentry");
   }
 
@@ -693,6 +742,11 @@ export function createBattle({ app, onExit, onOpenGuide }) {
   }
 
   function stepExpired(s) {
+    if (s.expires) {
+      // An event step that never fired must not block the steps after it.
+      const idx = level.phases.findIndex((p) => p.id === s.expires.slice(6));
+      if (idx >= 0 && game.phaseIndex >= idx && game.mode === "phase") return true;
+    }
     if (s.when === "calm") return game.mode !== "calm";
     if (s.when.startsWith("phase:")) {
       const idx = level.phases.findIndex((p) => p.id === s.when.slice(6));
@@ -703,6 +757,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
 
   function stepDone(s, now) {
     const d = s.done || {};
+    if (d.ok) return coach.acked.has(s.id);
     if (d.placed) return game.units.some((u) => u.type === d.placed);
     if (d.deployed) return (coach.baseline[`deployed:${d.deployed}`] || 0) >= (d.count || 1);
     if (d.phase) return currentPhase(game)?.id === d.phase && game.mode === "phase";
@@ -732,12 +787,23 @@ export function createBattle({ app, onExit, onOpenGuide }) {
 
   function updateCoach(now) {
     const s = cardKind || paused ? null : currentCoach(now);
+    coachNow = s;
     coachCell = s?.cell || null;
     set("coach", s ? s.id : null, () => {
       el.coach.hidden = !s;
-      if (s) el.coachText.textContent = personalise(s.text, app.state.person.name);
+      if (s) setRich(el.coachText, personalise(s.text, app.state.person.name));
+      el.coachOk.hidden = !(s && s.done && s.done.ok);
+      // Restart the bubble's entrance so a new tip is seen to be new.
+      el.coach.classList.remove("is-new");
+      void el.coach.offsetWidth;
+      el.coach.classList.add("is-new");
     });
   }
+
+  el.coachOk.addEventListener("click", () => {
+    if (coachNow && coachNow.done?.ok) coach.acked.add(coachNow.id);
+    lastNow = performance.now();
+  });
 
   function coachTarget() {
     const s = cardKind || paused || !game ? null : currentCoach(performance.now());
@@ -750,7 +816,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
   function showBanner(kicker, title, sub = "") {
     el.bannerKicker.textContent = kicker;
     el.bannerTitle.textContent = title;
-    el.bannerSub.textContent = sub;
+    setRich(el.bannerSub, sub);
     el.bannerSub.hidden = !sub;
     clearTimeout(bannerTimer);
     clearTimeout(bannerOutTimer);
@@ -805,9 +871,10 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       h("p", { class: "card-kicker", text: `${level.threatKind} · Age ${level.age}` }),
       h("h2", { class: "card-title", id: "card-title", text: level.title }),
       h("p", { class: "card-copy", text: personalise(level.intro, who()) }),
-      h("p", { class: "card-fact", text: level.teaches }),
+      h("p", { class: "card-fact" }, ...rich(level.teaches)),
       h("div", { class: "card-actions" },
-        h("button", { class: "btn btn-primary btn-block", id: "card-go", onclick: () => { unlockAudio(); hideCard(); } }, "Place your Sentries")),
+        h("button", { class: "btn btn-primary btn-block", id: "card-go", onclick: () => { unlockAudio(); hideCard(); } },
+          level.tutorial ? "Let's go" : "Place your Sentries")),
     ], "card-go");
   }
 
@@ -819,7 +886,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       phaseDots(game.phaseIndex + 1, level.phases.length),
       h("p", { class: "card-kicker", text: done.bodyTime }),
       h("h2", { class: "card-title", id: "card-title", text: done.name }),
-      h("p", { class: "card-fact", text: done.fact }),
+      h("p", { class: "card-fact" }, ...rich(done.fact)),
       h("div", { class: "card-actions" },
         h("button", {
           class: "btn btn-primary btn-block", id: "card-go",
@@ -866,7 +933,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
         hero("alarm"),
         h("p", { class: "card-kicker", text: `${level.title} · lost` }),
         h("h2", { class: "card-title", id: "card-title", text: `${name} got much sicker.` }),
-        h("p", { class: "card-fact", text: tip }),
+        h("p", { class: "card-fact" }, ...rich(tip)),
         ...recap,
         h("div", { class: "card-actions" },
           h("button", { class: "btn btn-primary btn-block", id: "card-go", onclick: () => restart() }, "Try again"),

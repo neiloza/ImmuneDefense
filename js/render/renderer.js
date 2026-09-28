@@ -37,7 +37,7 @@ import {
   drawThing, drawInfected, drawFingerprint, roundRect,
 } from "./sprites.js";
 import {
-  paintScene, frameColor, drawFlow,
+  paintScene, frameColor, drawFlow, drawAmbient,
   drawWound as sceneWound, drawLining as sceneLining, drawFracture as sceneFracture,
 } from "./scenes.js";
 
@@ -270,6 +270,7 @@ export function createRenderer(canvas) {
     ctx.translate(ox, oy);
 
     drawBloodFlow(t);
+    if (!ui.reducedMotion) drawAmbient(ctx, env(), t);
     if (level.goalLabel && map.goalY != null) {
       label(ctx, level.goalLabel, T * 0.2, (map.goalY + 0.62) * T, T, "#ffffff");
     }

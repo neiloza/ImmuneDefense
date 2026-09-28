@@ -74,6 +74,11 @@ for (const level of LEVELS) {
 
     for (const step of level.coach || []) {
       if (step.cell) assert.ok(CELLS[step.cell], `coach names unknown cell ${step.cell}`);
+      if (step.unlock) assert.ok(level.newCells.includes(step.unlock) || cellsAvailableAt(level.id).includes(step.unlock), `coach unlocks unknown cell ${step.unlock}`);
+      const doneKeys = Object.keys(step.done || {});
+      assert.ok(doneKeys.length > 0, `coach step ${step.id} never completes`);
+      for (const k of doneKeys) assert.ok(["placed", "deployed", "count", "phase", "seconds", "trainingStarted", "trained", "ok"].includes(k), `coach step ${step.id}: unknown done key ${k}`);
+      if (step.hold) assert.ok(step.done.ok || step.done.placed || step.done.deployed, `coach step ${step.id} holds the clock but waits on the clock`);
       if (step.when.startsWith("phase:")) assert.ok(phaseIds.includes(step.when.slice(6)), `coach waits for unknown phase ${step.when}`);
       if (step.done?.phase) assert.ok(phaseIds.includes(step.done.phase));
       if (step.at) assert.ok(step.at[0] >= 0 && step.at[0] <= 9 && step.at[1] >= 0 && step.at[1] <= 16);

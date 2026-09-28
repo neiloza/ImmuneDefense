@@ -43,6 +43,19 @@
  *   pus        inside a random blob of pus (falls back to the wound)
  *   deadTiles  a random dead airway cell (falls back to the lining)
  *
+ * ---- Coaching --------------------------------------------------------------
+ *   A level's `coach` is a list of steps shown one at a time (js/battle.js).
+ *   when: "calm" | "phase:<id>" | "event:<type>"   when the step can show
+ *   done: { placed | deployed(+count) | phase | seconds | trainingStarted |
+ *           trained | ok }   what completes it; `ok` shows a "Got it" button
+ *   hold: true      the clock stops while this step is up (tutorials only —
+ *                   the bots never see the coach, so this is UI-side)
+ *   unlock: cellId  the toolbar shows this cell only from this step on
+ *   expires: "phase:<id>"  an event step is skipped once this phase starts
+ *   cell: cellId    the toolbar card to pulse;  at: [x, y]  a ring to tap
+ *   text            ten words; *stars* mark the word to highlight
+ *   A level with `tutorial: true` skips the loadout screen on first play.
+ *
  * ---- Optional phase behaviour ------------------------------------------------
  *   trickle: {type, every, where, until?}  one more threat every `every`
  *            seconds for the whole phase — or, with `until` (a Fingerprint
@@ -98,25 +111,50 @@ export const LEVELS = [
     // pus is within `radius` of the wound.
     healing: { x: 4.5, y: 1.4, radius: 2.2, rate: 2.5, blockers: ["bacterium", "pus"], label: "Wound" },
     barracks: null,
+    // The tutorial. One cell at a time: a step with `hold` freezes the clock
+    // until it is done, so nothing happens on the map while the player reads;
+    // `unlock` puts the next cell in the toolbar only when the coach reaches
+    // it; `done: { ok: true }` waits for a "Got it" tap. A cell is introduced
+    // (what it does), placed (how to use it), then watched working before
+    // the next one appears.
+    tutorial: true,
     coach: [
-      { id: "place-scout", when: "calm", cell: "scout", at: [4.5, 4.5],
-        text: "Tap Scout, then tap the ring. Scouts reveal hidden bacteria.",
+      { id: "meet-scout", when: "calm", hold: true, unlock: "scout", cell: "scout",
+        text: "This is a *Scout*. It finds hidden bacteria.",
+        done: { ok: true } },
+      { id: "place-scout", when: "calm", hold: true, cell: "scout", at: [4.5, 4.5],
+        text: "Tap *Scout*, then tap the *ring*.",
         done: { placed: "scout" } },
-      { id: "place-devourer", when: "calm", cell: "devourer", at: [4.5, 3.5],
-        text: "Now a Devourer here. It eats whatever comes close.",
+      { id: "meet-devourer", when: "calm", hold: true, unlock: "devourer", cell: "devourer",
+        text: "Scouts only *look*. A *Devourer* eats.",
+        done: { ok: true } },
+      { id: "place-devourer", when: "calm", hold: true, cell: "devourer", at: [4.5, 3.5],
+        text: "Tap *Devourer*, then tap the ring by the wound.",
         done: { placed: "devourer" } },
       { id: "wait", when: "calm",
-        text: "Ready? Tap Start, or wait for the timer.",
+        text: "Bacteria are coming. Tap *Start* when ready.",
         done: { phase: "breach" } },
+      { id: "spotted", when: "event:ping", hold: true, expires: "phase:rush",
+        text: "Spotted! The Devourer eats what comes *close*.",
+        done: { ok: true } },
+      { id: "meet-rusher", when: "phase:rush", hold: true, unlock: "rusher", cell: "rusher",
+        text: "A big wave! Meet the *Rusher*: cheap, fast, aimed.",
+        done: { ok: true } },
       { id: "rush", when: "phase:rush", cell: "rusher",
-        text: "Tap Rusher, then tap a revealed group.",
-        done: { deployed: "rusher", count: 2 } },
+        text: "Tap *Rusher*, then tap a group of bacteria.",
+        done: { deployed: "rusher", count: 1 } },
+      { id: "more", when: "phase:rush", cell: "rusher",
+        text: "Rushers die after a few kills. *Send more.*",
+        done: { deployed: "rusher", count: 3 } },
       { id: "select", when: "phase:rush",
-        text: "Tap a Rusher, then tap where to send it.",
+        text: "Tap a Rusher, then tap where to *send* it.",
         done: { seconds: 9 } },
       { id: "pus", when: "phase:cleanup",
-        text: "Pus hides bacteria. Devourers eat both.",
+        text: "*Pus* hides bacteria. Devourers eat both.",
         done: { seconds: 9 } },
+      { id: "closing", when: "phase:closing",
+        text: "Keep the wound *clear* so skin regrows.",
+        done: { seconds: 8 } },
     ],
     phases: [
       {
@@ -208,19 +246,25 @@ export const LEVELS = [
     barracks: { x: 8.5, y: 11, fingerprint: "flu", samples: ["virus", "infected"], trainTime: 24, label: "Barracks" },
     coach: [
       { id: "place-scout", when: "calm", cell: "scout", at: [4.5, 3.6],
-        text: "Put a Scout in the airway, above the lining.",
+        text: "Put a *Scout* in the airway, above the lining.",
         done: { placed: "scout" } },
       { id: "place-devourer", when: "calm", cell: "devourer", at: [2.5, 3.2],
-        text: "Devourers in the airway eat viruses before they enter cells.",
+        text: "*Devourers* in the airway eat viruses before they enter cells.",
         done: { placed: "devourer" } },
-      { id: "sample", when: "phase:blind",
-        text: "Keep a Scout beside the infection to grab its Fingerprint.",
+      { id: "sample", when: "phase:blind", hold: true,
+        text: "Only a *Scout* can carry the virus's Fingerprint.",
+        done: { ok: true } },
+      { id: "sample-go", when: "phase:blind",
+        text: "Keep a Scout *beside* the infection to grab it.",
         done: { trainingStarted: true } },
       { id: "training", when: "event:training",
-        text: "Barracks training. Slow the spread with Devourers and Rushers.",
+        text: "Barracks *training*. Slow the spread with Devourers and Rushers.",
         done: { trained: true } },
+      { id: "meet-hunter", when: "event:trained", hold: true, cell: "hunter",
+        text: "*Bounty Hunters* ready. They kill infected cells.",
+        done: { ok: true } },
       { id: "hunters", when: "event:trained", cell: "hunter",
-        text: "Bounty Hunters ready! Tap one, then tap an infected cell.",
+        text: "Tap *Bounty Hunter*, then tap an infected cell.",
         done: { deployed: "hunter", count: 1 } },
     ],
     phases: [
@@ -309,16 +353,22 @@ export const LEVELS = [
     barracks: null,
     coach: [
       { id: "place-devourer", when: "calm", cell: "devourer", at: [4.5, 6.2],
-        text: "Nothing comes from outside. Put a Devourer beside the break.",
+        text: "Nothing comes from outside. Put a *Devourer* beside the break.",
         done: { placed: "devourer" } },
+      { id: "meet-siren", when: "calm", hold: true, cell: "siren",
+        text: "Meet the *Siren*. It raises the *Alarm*.",
+        done: { ok: true } },
+      { id: "siren-rule", when: "calm", hold: true, cell: "siren",
+        text: "More Alarm, more Signal. Past *60* it hurts.",
+        done: { ok: true } },
       { id: "place-siren", when: "calm", cell: "siren", at: [2.5, 4.5],
-        text: "Sirens raise the Alarm. More Signal — but 60+ hurts.",
+        text: "Tap *Siren*, then tap the ring.",
         done: { placed: "siren" } },
       { id: "alarm", when: "phase:inflammation",
-        text: "Debris raises the Alarm too. Clear it before 60.",
+        text: "Debris raises the Alarm too. Clear it before *60*.",
         done: { seconds: 10 } },
       { id: "band", when: "phase:rebuild",
-        text: "Builders like Alarm 20–60. Tap a Siren to retire it.",
+        text: "Builders like Alarm *20–60*. Tap a Siren to retire it.",
         done: { seconds: 12 } },
     ],
     phases: [

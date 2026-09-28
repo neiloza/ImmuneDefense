@@ -7,6 +7,13 @@
  * of the computed style at startup, so the battle art and the HTML around it
  * can never drift apart. Rename a token here and palette.js must follow.
  *
+ * The mood is a STORYBOOK, not a textbook: a game about cuts and germs
+ * turns gross the moment blood goes dark and tissue goes raw, so every body
+ * colour here is pastel — vessels are coral, blood is rose, muscle is
+ * salmon, a clot is a soft red, a bruise is lilac. The body should look like
+ * something a child wants to protect. Threats may be vivid; the body never
+ * is.
+ *
  * The concept is a STAINED MICROSCOPE SLIDE. Real tissue under a microscope
  * is dyed with two stains: eosin turns cytoplasm pink, hematoxylin turns
  * nuclei purple. So the whole app lives in that pair — slide-glass white,
@@ -82,36 +89,36 @@
    * meter (docs/DESIGN.md, Art direction). */
   --tissue:          #f4dcdc;
   --tissue-shade:    #ebc9ca;
-  --tissue-inflamed: #e88a8a;
-  --skin:            #ecc3b2;
-  --skin-deep:       #d9a08f;
-  --clot:            #8e2a35;
-  --vessel:          #c0405a;
-  --vessel-dark:     #8a2238;
-  --blood:           #a82a3c;
-  --rbc:             #d9485a;
+  --tissue-inflamed: #f0a3a0;
+  --skin:            #f2cdbc;
+  --skin-deep:       #e5b3a0;
+  --clot:            #d9707a;
+  --vessel:          #e07a8a;
+  --vessel-dark:     #c9667a;
+  --blood:           #ea8f9c;
+  --rbc:             #f6b6bf;
   --airway:          #eef1f6;
   --lining:          #e7c2d2;
   --lining-dead:     #c9b7ba;
   --bone:            #f3ecda;
   --bone-shade:      #d8ccb0;
-  --hematoma:        #7a2230;
-  --callus:          #e8dcc0;
+  --hematoma:        #c98090;
+  --callus:          #ece1c8;
   --node:            #b79ad6;
 
   /* Scenes — each level is painted as the tissue it defends (js/render/
    * scenes.js): a skin cross-section, a bronchial airway, an arm bone in
    * muscle. */
-  --epidermis:       #e2ae97;
-  --corneum:         #f1d5c2;
-  --hair:            #4a3328;
-  --fat:             #f5e6bd;
-  --fat-line:        #dcc48c;
-  --mucus:           #dfe8f2;
-  --muscle:          #d98383;
-  --muscle-dark:     #b25a60;
-  --muscle-light:    #ecaaa6;
-  --fascia:          #f4e6de;
+  --epidermis:       #edc2ad;
+  --corneum:         #f6dfd0;
+  --hair:            #8a6350;
+  --fat:             #f9edd6;
+  --fat-line:        #e9d9b6;
+  --mucus:           #e3ecf5;
+  --muscle:          #f0b3a9;
+  --muscle-dark:     #dc9490;
+  --muscle-light:    #f8d0c7;
+  --fascia:          #f8ece6;
   --cartilage:       #cfdbe0;
   --cartilage-dark:  #9db2bd;
   --marrow:          #f3dcae;
@@ -128,8 +135,8 @@
   --enemy-dark:      #5a7d1c;
   --enemy-alt:       #e0a526;
   --enemy-alt-dark:  #9a6a0e;
-  --debris:          #a38f7a;
-  --pus:             #e8dc9a;
+  --debris:          #d8cab6;
+  --pus:             #f4ecc8;
 
   /* Meters. */
   --signal:          #3a7bd5;
