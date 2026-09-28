@@ -21,7 +21,7 @@
  * offline forever (LESSONS 1.4).
  */
 
-var CACHE = "immunedefense-b4";
+var CACHE = "immunedefense-b5";
 
 var SHELL = [
   "./",

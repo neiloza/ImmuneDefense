@@ -8,11 +8,12 @@
  * can never drift apart. Rename a token here and palette.js must follow.
  *
  * The mood is a STORYBOOK, not a textbook: a game about cuts and germs
- * turns gross the moment blood goes dark and tissue goes raw, so every body
- * colour here is pastel — vessels are coral, blood is rose, muscle is
- * salmon, a clot is a soft red, a bruise is lilac. The body should look like
- * something a child wants to protect. Threats may be vivid; the body never
- * is.
+ * turns gross the moment the world is flesh-coloured, however soft. So THE
+ * BODY IS NOT PINK. Tissue and muscle are lavender, the airway is sky blue,
+ * bone is ivory, a bruise is lilac; only the skin's surface is a thin band
+ * of peach, and only blood keeps a cheerful coral so a vessel still reads
+ * as one. The body should look like a place, and one a child wants to
+ * protect. Threats may be vivid; the body never is.
  *
  * The concept is a STAINED MICROSCOPE SLIDE. Real tissue under a microscope
  * is dyed with two stains: eosin turns cytoplasm pink, hematoxylin turns
@@ -30,9 +31,9 @@
 
 :root {
   /* --- surfaces: slide glass, faintly warm ------------------------------- */
-  --bg:            #fbf3f2;
+  --bg:            #f9f6fc;
   --bg-raised:     #ffffff;
-  --bg-sunken:     #f3e6e5;
+  --bg-sunken:     #efe9f7;
 
   /* --- ink: hematoxylin, darkened until it reads as text ----------------- */
   --ink:           #24172b;
@@ -45,8 +46,8 @@
   --accent-contrast: #ffffff;
 
   /* --- structure --------------------------------------------------------- */
-  --line:          #ead8d7;
-  --line-strong:   #d6bcbb;
+  --line:          #e4dbef;
+  --line-strong:   #cdbfe0;
 
   /* --- semantic only. Never brand. -------------------------------------- */
   --good:          #2c6349;
@@ -87,42 +88,42 @@
   /* The body. Tissue is eosin pink; it reddens as the Alarm rises, which is
    * the whole point of showing inflammation on the map rather than only on a
    * meter (docs/DESIGN.md, Art direction). */
-  --tissue:          #f4dcdc;
-  --tissue-shade:    #ebc9ca;
-  --tissue-inflamed: #f0a3a0;
-  --skin:            #f2cdbc;
-  --skin-deep:       #e5b3a0;
-  --clot:            #d9707a;
-  --vessel:          #e07a8a;
-  --vessel-dark:     #c9667a;
-  --blood:           #ea8f9c;
-  --rbc:             #f6b6bf;
-  --airway:          #eef1f6;
-  --lining:          #e7c2d2;
-  --lining-dead:     #c9b7ba;
-  --bone:            #f3ecda;
-  --bone-shade:      #d8ccb0;
-  --hematoma:        #c98090;
-  --callus:          #ece1c8;
+  --tissue:          #e9e2f4;
+  --tissue-shade:    #d6cbeb;
+  --tissue-inflamed: #f2a6a0;
+  --skin:            #f4dcc8;
+  --skin-deep:       #e8c0a8;
+  --clot:            #e07b7b;
+  --vessel:          #e8887e;
+  --vessel-dark:     #d46f6a;
+  --blood:           #f09a90;
+  --rbc:             #f8c0b6;
+  --airway:          #eaf2fb;
+  --lining:          #d8c8ee;
+  --lining-dead:     #c9c3cf;
+  --bone:            #f6f0e2;
+  --bone-shade:      #dcd2ba;
+  --hematoma:        #a78bd0;
+  --callus:          #efe6d0;
   --node:            #b79ad6;
 
   /* Scenes — each level is painted as the tissue it defends (js/render/
    * scenes.js): a skin cross-section, a bronchial airway, an arm bone in
    * muscle. */
-  --epidermis:       #edc2ad;
-  --corneum:         #f6dfd0;
+  --epidermis:       #f1c9ae;
+  --corneum:         #f8e6d6;
   --hair:            #8a6350;
-  --fat:             #f9edd6;
-  --fat-line:        #e9d9b6;
-  --mucus:           #e3ecf5;
-  --muscle:          #f0b3a9;
-  --muscle-dark:     #dc9490;
-  --muscle-light:    #f8d0c7;
-  --fascia:          #f8ece6;
-  --cartilage:       #cfdbe0;
-  --cartilage-dark:  #9db2bd;
-  --marrow:          #f3dcae;
-  --alveoli:         #f0c9cb;
+  --fat:             #fbf1d8;
+  --fat-line:        #eadfbf;
+  --mucus:           #e0ebf7;
+  --muscle:          #d8c4ea;
+  --muscle-dark:     #c2a9dd;
+  --muscle-light:    #e9dcf5;
+  --fascia:          #f5eefb;
+  --cartilage:       #d3e3ea;
+  --cartilage-dark:  #a9c2cd;
+  --marrow:          #f7e3c0;
+  --alveoli:         #e8def3;
 
   /* Your cells: pale bodies with hematoxylin nuclei, like a blood smear. */
   --ally-body:       #fbf7ff;

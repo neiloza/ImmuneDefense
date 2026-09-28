@@ -249,8 +249,8 @@ function paintSkin(g, env, rnd) {
 
   // Dermis: eosin pink, lit from the surface, warmer just under the skin.
   const derm = g.createLinearGradient(0, 0, 0, goalTop);
-  derm.addColorStop(0, mix(pal.skin, pal.tissue, 0.35));
-  derm.addColorStop(0.25, pal.tissue);
+  derm.addColorStop(0, mix(pal.skin, pal.tissue, 0.6));
+  derm.addColorStop(0.12, pal.tissue);
   derm.addColorStop(1, mix(pal.tissue, pal.tissueShade, 0.5));
   g.fillStyle = derm;
   g.fillRect(0, 0, w, h);
@@ -259,7 +259,7 @@ function paintSkin(g, env, rnd) {
   g.lineWidth = Math.max(1, T * 0.05);
   for (let k = 0; k < 16; k++) {
     const y = skinBot + rnd() * (fatTop - skinBot);
-    g.strokeStyle = withAlpha(pal.skinDeep, 0.16 + rnd() * 0.12);
+    g.strokeStyle = withAlpha(pal.tissueShade, 0.5 + rnd() * 0.3);
     wavyLine(g, -T, w + T, y, T * (0.08 + rnd() * 0.1), (0.9 + rnd()) / T, rnd() * 6, T / 4);
   }
   faintCells(g, env, rnd, 50, ["."]);
@@ -761,6 +761,6 @@ export function paintScene(g, env) {
 /* The frame around the map: a darker take on the scene's own base. */
 export function frameColor(env) {
   const { pal, level } = env;
-  const base = level.scene === "bone" ? pal.muscleDark : level.scene === "skin" ? pal.skinDeep : pal.tissueShade;
+  const base = level.scene === "bone" ? pal.muscleDark : pal.tissueShade;
   return mix(base, pal.ink, 0.12);
 }

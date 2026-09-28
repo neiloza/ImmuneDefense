@@ -15,7 +15,7 @@
  * ========================================================================= */
 
 export const APP_SLUG = "immunedefense";
-export const BUILD = 4;
+export const BUILD = 5;
 
 /* The cache name sw.js uses for this build. Kept derivable from BUILD so the
  * drift check has one rule to enforce. */

@@ -25,8 +25,13 @@ cause.** Say which one you have.
 
 ## Current status (as of 2026-09-28)
 
-**Build 4. The first playable slice, after polish, scene, and
-"make it kind" passes.** Built from the design in
+**Build 5. The first playable slice, after polish, scene, and
+"make it kind" passes.** Build 5 took the body off flesh tones altogether
+(the owner found even pastel pink disturbing): tissue and muscle are
+lavender, the airway sky blue, bone ivory, the app chrome lavender-white;
+only the skin surface is a thin peach band and only blood keeps a coral.
+The rule is written at the top of `css/tokens.css`: **the body is not
+pink.** Built from the design in
 [`docs/DESIGN.md`](./docs/DESIGN.md); nobody has played it on a real phone
 yet (see *Waiting on a human*).
 
