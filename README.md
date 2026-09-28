@@ -67,6 +67,10 @@ dependencies. It was scaffolded from the GameHub starter kit
 | `test/` | Unit tests, scripted bots, the browser smoke test |
 | `scripts/` | Deploy pre-flight, docs check, balance report, mutation check |
 
+Two rules shape the writing: cells are named for their job with the real
+name underneath, and **nothing a player reads in play is longer than ten
+words** — a test enforces it. Longer explanations live in the Field Guide.
+
 The one idea that shapes everything: **the game is a pure function of
 (level, seed, taps).** The same `js/sim/game.js` runs in the browser, in the
 unit tests, and under the scripted bots that measure how hard each level is.

@@ -579,7 +579,7 @@ function updateDevourer(state, d, dt) {
     if (d.cd <= 0) {
       d.cd = def.eatEvery;
       d.kills += 1;
-      emit(state, "eat", { x: meal.x, y: meal.y, threat: meal.type });
+      emit(state, "eat", { x: meal.x, y: meal.y, threat: meal.type, id: meal.id });
       killThreat(state, meal, d, "eaten");
     }
     return;
@@ -993,7 +993,7 @@ function killThreat(state, th, by, cause) {
     if (cell) { cell.status = "dead"; cell.regrow = 0; }
     addThreat(state, "debris", th.x + randRange(state, -0.15, 0.15), th.y + randRange(state, -0.15, 0.15));
   }
-  emit(state, "kill", { x: th.x, y: th.y, threat: th.type, by: by ? by.type : null, cause });
+  emit(state, "kill", { x: th.x, y: th.y, threat: th.type, id: th.id, by: by ? by.type : null, cause });
 }
 
 function killUnit(state, u, cause) {
@@ -1009,7 +1009,7 @@ function killUnit(state, u, cause) {
       emit(state, "sampleLost", { fingerprint: u.carrying });
     }
   }
-  emit(state, "death", { x: u.x, y: u.y, cell: u.type, cause });
+  emit(state, "death", { x: u.x, y: u.y, cell: u.type, id: u.id, cause });
 }
 
 function sweep(state) {

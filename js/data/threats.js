@@ -2,7 +2,8 @@
  * threats.js — what attacks the body, plus the rules of the meters (Signal,
  * Alarm, Host Health). Every number the simulation uses lives here.
  *
- * Units: TILES and SECONDS, as in cells.js.
+ * Units: TILES and SECONDS, as in cells.js. `line` and `realJob` are ten
+ * words at most (test/unit/copy.test.mjs).
  * ========================================================================= */
 
 export const THREATS = {
@@ -20,8 +21,8 @@ export const THREATS = {
                            // that cell is already holding off its `holds`
                            // (cells.js), in which case it slips past
     hidden: true,          // invisible until a Scout reveals it
-    line: "Splits in two if it is not killed fast.",
-    realJob: "Bacteria divide every 20 minutes or so when they find warm, wet tissue.",
+    line: "Splits in two if not killed fast.",
+    realJob: "Divides every 20 minutes in warm, wet tissue.",
   },
 
   virus: {
@@ -33,8 +34,8 @@ export const THREATS = {
     life: 16,              // a free virus that finds no cell falls apart
     infectRange: 0.5,
     hidden: true,
-    line: "Slips inside your airway cells, where most of your cells can't reach it.",
-    realJob: "A virus can't copy itself on its own — it hijacks a living cell to do it.",
+    line: "Slips inside airway cells, out of reach.",
+    realJob: "Can't copy itself; it hijacks a living cell.",
   },
 
   infected: {
@@ -46,8 +47,8 @@ export const THREATS = {
     burstCount: 3,         // …releasing this many new viruses…
     hostDamage: 3,         // …and costing this much Host Health
     hidden: true,
-    line: "One of your own cells, taken over. Only Bounty Hunters can stop it.",
-    realJob: "An infected cell becomes a virus factory, then bursts and dies.",
+    line: "Your own cell, hijacked. Only Bounty Hunters stop it.",
+    realJob: "Becomes a virus factory, then bursts.",
   },
 
   debris: {
@@ -57,7 +58,7 @@ export const THREATS = {
     radius: 0.2,
     alarm: 3,              // Alarm added per piece lying around (danger signals)
     hidden: false,         // damage, not an invader — always visible
-    line: "Dead cells and fragments. Raises the Alarm and blocks healing.",
+    line: "Dead bits. Raises the Alarm, blocks healing.",
     realJob: "Dying cells release danger signals that start inflammation.",
   },
 
@@ -69,8 +70,8 @@ export const THREATS = {
     alarm: 2,
     decayAfter: 45,        // drains away on its own eventually
     hidden: false,
-    line: "What a Rusher leaves when it dies. Blocks healing until a Devourer eats it.",
-    realJob: "Pus is mostly dead neutrophils. Macrophages clear it away.",
+    line: "Dead Rushers. Blocks healing until eaten.",
+    realJob: "Mostly dead neutrophils. Macrophages clear it.",
   },
 };
 

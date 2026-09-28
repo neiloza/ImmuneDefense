@@ -12,6 +12,10 @@
  * the cell is shown. Both strings live here so the tray, the loadout screen
  * and the Field Guide can never disagree.
  *
+ * `line` (the tray and loadout), `job` (the Field Guide, in the game) and
+ * `realJob` (the Field Guide, in real life) are TEN WORDS AT MOST, enforced
+ * by test/unit/copy.test.mjs. A player skims; a paragraph is not read.
+ *
  * `id`s are PERMANENT. Saves and loadouts point at them (house rule: store
  * decisions, never content). Rename a cell by changing `name`, never `id`.
  * ========================================================================= */
@@ -30,9 +34,9 @@ export const CELLS = {
     sampleRange: 1.3,      // touching distance for taking a Fingerprint
     carrySpeed: 1.6,       // tiles/s while walking a Fingerprint to the Barracks
     targets: [],
-    line: "Reveals hidden threats nearby and alerts you.",
-    job: "Finds threats. Only a Scout can carry a Fingerprint to the Barracks.",
-    realJob: "Samples invaders and carries them to a lymph node to show the T cells.",
+    line: "Spots hidden threats nearby.",
+    job: "Reveals hidden threats. Carries Fingerprints to the Barracks.",
+    realJob: "Samples invaders and shows them to T cells.",
     goodAgainst: ["Hidden threats"],
   },
 
@@ -54,9 +58,9 @@ export const CELLS = {
     // hidden inside a living cell of Billy's own, which is exactly why the
     // body needs Bounty Hunters (docs/DESIGN.md, Flu level).
     targets: ["bacterium", "virus", "debris", "pus"],
-    line: "Big stationary eater. Swallows whatever comes close.",
-    job: "Engulfs bacteria, free viruses, debris and pus that come near its post.",
-    realJob: "Engulfs microbes and dead cells. “Macrophage” is Greek for “big eater”.",
+    line: "Big, slow eater. Swallows what comes close.",
+    job: "Eats bacteria, viruses, debris and pus near its post.",
+    realJob: "Eats microbes and dead cells. Greek for “big eater”.",
     goodAgainst: ["Bacteria", "Debris", "Pus"],
   },
 
@@ -75,9 +79,9 @@ export const CELLS = {
     // Siren is worth about 12" — where a rate would not be.
     alarm: 12,
     targets: [],
-    line: "Raises the Alarm, which calls in help faster.",
-    job: "Adds to the Alarm while it lives. More Alarm, more Signal — and more damage past 60.",
-    realJob: "Releases histamine that drives inflammation — and allergies.",
+    line: "Raises the Alarm for faster Signal.",
+    job: "Adds 12 Alarm while alive. Past 60, it hurts.",
+    realJob: "Releases histamine, which drives inflammation and allergies.",
     goodAgainst: ["Slow Signal"],
   },
 
@@ -100,9 +104,9 @@ export const CELLS = {
     maxKills: 3,           // …or after this many kills, whichever is first
     leavesPus: true,       // every Rusher that dies becomes a blob of pus
     targets: ["bacterium", "virus", "debris"],
-    line: "Cheap, fast attacker you aim at threats. Dies after a few kills.",
-    job: "Sent in threes to whatever you tap. Dies after 3 kills or 20 seconds — and leaves pus.",
-    realJob: "The first cells to arrive; they die in the fight. Pus is mostly dead neutrophils.",
+    line: "Cheap squad you aim. Dies after a few kills.",
+    job: "Three per deploy. Dies after 3 kills, leaving pus.",
+    realJob: "First to arrive; dies fighting. Pus is dead neutrophils.",
     goodAgainst: ["Bacteria", "Free viruses", "Debris"],
   },
 
@@ -125,9 +129,9 @@ export const CELLS = {
     // Locked until the Barracks has trained against this Fingerprint.
     needsFingerprint: "flu",
     targets: ["infected"],
-    line: "Aimed at infected cells. Each kill makes a copy.",
-    job: "Kills only infected cells carrying its Fingerprint, and copies itself on every kill.",
-    realJob: "Kills infected cells showing its one target, and multiplies when it finds it.",
+    line: "Aim at infected cells. Each kill makes a copy.",
+    job: "Kills infected cells with its Fingerprint. Copies itself per kill.",
+    realJob: "Kills infected cells showing its target, then multiplies.",
     goodAgainst: ["Infected cells"],
   },
 };
@@ -141,8 +145,8 @@ export const NEUTRALS = {
     realName: "Osteoblast",
     radius: 0.3,
     speed: 0.8,
-    job: "Arrives on its own once the break is cleaned up, and lays down new bone.",
-    realJob: "Builds new bone — first a soft callus bridging the break, then hard bone.",
+    job: "Arrives once the break is clean. Lays new bone.",
+    realJob: "Builds soft callus first, then hard bone.",
   },
 };
 

@@ -54,7 +54,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     healBlock: $("heal-block"), healMeter: $("heal-meter"), healFill: $("heal-fill"), healNum: $("heal-num"), healName: $("heal-name"),
     calmBar: $("calm-bar"), calmText: $("calm-text"), calmStart: $("calm-start"),
     coach: $("coach"), coachText: $("coach-text"),
-    banner: $("banner"), bannerKicker: $("banner-kicker"), bannerTitle: $("banner-title"),
+    banner: $("banner"), bannerKicker: $("banner-kicker"), bannerTitle: $("banner-title"), bannerSub: $("banner-sub"),
     info: $("info-pop"), infoIcon: $("info-icon"), infoName: $("info-name"), infoReal: $("info-real"),
     infoLine: $("info-line"), infoRetire: $("info-retire"), infoClose: $("info-close"),
     signalBar: $("signal-bar"), signalFill: $("signal-fill"), signalNum: $("signal-num"),
@@ -75,7 +75,8 @@ export function createBattle({ app, onExit, onOpenGuide }) {
   let cardKind = null;           // "intro" | "interlude" | "end" | null
   let infoFor = null;            // { kind: "unit"|"threat"|"selection", id }
   let bannerTimer = 0;
-  let pingToasted = false;
+  let bannerOutTimer = 0;
+  let hostLast = null;
   let seenDirty = false;
   const hud = {};                // last values written, to skip no-op DOM writes
 
@@ -100,7 +101,6 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     game = createGame(level, { seed: s, loadout });
     paused = false;
     acc = 0;
-    pingToasted = false;
     ui.selected.clear();
     ui.placing = null;
     ui.ghost = null;
@@ -207,30 +207,30 @@ export function createBattle({ app, onExit, onOpenGuide }) {
         case "reveal":
           if (markSeen(app.state, [`threat:${e.threat}`])) seenDirty = true;
           break;
-        case "ping":
-          if (!pingToasted) { pingToasted = true; toast("A Scout spotted something. Revealed threats can be targeted."); }
-          break;
         case "sample":
-          toast("A Scout took the virus's Fingerprint. It's walking to the Barracks.");
+          toast("Fingerprint taken. Heading to the Barracks.");
           break;
         case "sampleLost":
-          toast("The Scout carrying the Fingerprint was lost. Another Scout must take a new sample.");
+          toast("Fingerprint lost. Another Scout must sample again.");
           break;
         case "training":
           if (markSeen(app.state, ["term:fingerprint", "term:barracks"])) seenDirty = true;
           break;
         case "trained":
-          showBanner("The Barracks", "Bounty Hunters ready");
+          showBanner("The Barracks", "Bounty Hunters ready", "Tap one, then tap an infected cell.");
           break;
         case "storm":
-          showBanner("Alarm hit 100", "Cytokine storm!");
+          showBanner("Alarm hit 100", "Cytokine storm!", "Retire Sirens. Clear debris.");
           break;
         case "builders":
           if (markSeen(app.state, ["cell:builder"])) seenDirty = true;
           break;
         case "phaseStart": {
           const p = level.phases[e.index];
-          showBanner(p.bodyTime, p.name);
+          // The phase's hint rides on the banner instead of the card before
+          // it, so the card stays one line and the advice arrives when it
+          // is needed.
+          showBanner(p.bodyTime, p.name, personalise(p.hint, who()));
           break;
         }
         case "phaseEnd": {
@@ -267,6 +267,13 @@ export function createBattle({ app, onExit, onOpenGuide }) {
   function updateHud(now) {
     const hp = Math.round(game.host);
     set("host", hp, (v) => {
+      if (hostLast != null && v < hostLast) {
+        // Re-trigger the CSS flash: remove, reflow, add.
+        el.host.classList.remove("is-hit");
+        void el.host.offsetWidth;
+        el.host.classList.add("is-hit");
+      }
+      hostLast = v;
       el.hostFill.style.transform = `scaleX(${Math.max(0, v) / 100})`;
       el.host.setAttribute("aria-valuenow", String(v));
       el.host.classList.toggle("is-low", v < 50 && v >= 25);
@@ -281,7 +288,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
         pip.classList.toggle("is-now", i === game.phaseIndex && game.mode !== "won");
       });
       el.phaseLabel.textContent = game.mode === "calm"
-        ? "Before it starts — place your Sentries"
+        ? "Place your Sentries"
         : phase ? `${phase.bodyTime} · ${phase.name}` : "";
     });
 
@@ -313,12 +320,15 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     });
     set("signal", sig, (v) => {
       el.signalNum.textContent = String(v);
+      el.signalNum.classList.remove("is-bump");
+      void el.signalNum.offsetWidth;
+      el.signalNum.classList.add("is-bump");
       el.signalBar.setAttribute("aria-valuenow", String(v));
     });
 
     const calm = game.mode === "calm" && !cardKind;
     set("calmShown", calm, (v) => { el.calmBar.hidden = !v; });
-    if (calm) set("calmLeft", Math.ceil(game.calmLeft), (v) => { el.calmText.textContent = `Threat arrives in ${Math.max(0, v)}s`; });
+    if (calm) set("calmLeft", Math.ceil(game.calmLeft), (v) => { el.calmText.textContent = `Threat in ${Math.max(0, v)}s`; });
 
     updateTray();
     updateCoach(now);
@@ -358,10 +368,10 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     const def = CELLS[id];
     if (!def.needsFingerprint) return null;
     const fp = game.fingerprints[def.needsFingerprint];
-    if (!fp) return "No Barracks here";
+    if (!fp) return "No Barracks";
     if (fp.status === "ready") return null;
     if (fp.status === "training") return `Training ${Math.max(0, Math.ceil(fp.trainEnds - game.t))}s`;
-    if (fp.status === "carrying") return "Sample on its way";
+    if (fp.status === "carrying") return "On its way";
     return "Needs training";
   }
 
@@ -371,12 +381,14 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       const def = CELLS[id];
       const lock = trayLock(id);
       const poor = game.signal + 1e-9 < def.cost;
-      const key = `${id}:${lock}:${poor}:${ui.placing === id}`;
+      const hint = coachCell === id;
+      const key = `${id}:${lock}:${poor}:${ui.placing === id}:${hint}`;
       if (btn.dataset.key === key) continue;
       btn.dataset.key = key;
       btn.classList.toggle("is-locked", !!lock);
       btn.classList.toggle("is-poor", poor && !lock);
       btn.classList.toggle("is-selected", ui.placing === id);
+      btn.classList.toggle("is-hint", hint && ui.placing !== id);
       const tag = btn.querySelector(".tray-lock");
       tag.hidden = !lock;
       tag.textContent = lock || "";
@@ -398,10 +410,10 @@ export function createBattle({ app, onExit, onOpenGuide }) {
   }
 
   function lockExplanation(id, lock) {
-    if (lock === "No Barracks here") return `${CELLS[id].name}s need a Barracks to train them, and there is none in this level.`;
-    if (lock.startsWith("Training")) return `The Barracks is training ${CELLS[id].name}s. ${lock.replace("Training ", "")} to go.`;
-    if (lock === "Sample on its way") return "A Scout is carrying the Fingerprint to the Barracks.";
-    return `${CELLS[id].name}s must be trained first: a Scout has to carry the virus's Fingerprint to the Barracks.`;
+    if (lock === "No Barracks") return `No Barracks here, so no ${CELLS[id].name}s.`;
+    if (lock.startsWith("Training")) return `Training. ${lock.replace("Training ", "")} to go.`;
+    if (lock === "On its way") return "The Fingerprint is on its way.";
+    return "Needs training. Get a Scout next to the virus.";
   }
 
   /* Tray buttons: tap to select, then tap the map — OR drag straight from the
@@ -487,9 +499,9 @@ export function createBattle({ app, onExit, onOpenGuide }) {
       return true;
     }
     const why = {
-      "no-signal": `Not enough Signal — ${def.name} costs ${def.cost}.`,
-      "terrain": "Sentries go on open tissue — not on skin, vessels, bone or the lining.",
-      "occupied": "There is already a Sentry there.",
+      "no-signal": `Need ${def.cost} Signal.`,
+      "terrain": "Sentries go on open tissue only.",
+      "occupied": "Already taken.",
       "needs-training": lockExplanation(id, trayLock(id) || "Needs training"),
     }[res.reason];
     if (why) toast(why);
@@ -616,10 +628,10 @@ export function createBattle({ app, onExit, onOpenGuide }) {
 
   function showUnitInfo(u) {
     const def = CELLS[u.type] || NEUTRALS[u.type];
-    const extra = u.type === "siren" && level.alarm
-      ? ` Adds ${CELLS.siren.alarm} to the Alarm while it lives — retire it to let the Alarm fall.`
-      : "";
-    showInfo("unit", u.id, u.type, def.name, def.realName, (def.line || def.job || "") + extra, u.kind === "sentry");
+    const line = u.type === "siren" && level.alarm
+      ? `Adds ${CELLS.siren.alarm} Alarm while alive. Retire to lower it.`
+      : (def.line || def.job || "");
+    showInfo("unit", u.id, u.type, def.name, def.realName, line, u.kind === "sentry");
   }
 
   function showThreatInfo(th) {
@@ -646,7 +658,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     hud.selKey = key;
     const one = types.size === 1 ? CELLS[[...types][0]] : null;
     el.infoName.textContent = `${live.length} ${one ? one.name + (live.length > 1 ? "s" : "") : "cells"} selected`;
-    el.infoReal.textContent = "Tap a threat or a spot to send them";
+    el.infoReal.textContent = "Tap a threat or spot to send them";
     el.infoLine.textContent = "";
     drawIcon(el.infoIcon, renderer.palette, one ? one.id : "rusher");
   }
@@ -716,8 +728,11 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     return null;
   }
 
+  let coachCell = null;          // the tray button the current tip points at
+
   function updateCoach(now) {
     const s = cardKind || paused ? null : currentCoach(now);
+    coachCell = s?.cell || null;
     set("coach", s ? s.id : null, () => {
       el.coach.hidden = !s;
       if (s) el.coachText.textContent = personalise(s.text, app.state.person.name);
@@ -732,18 +747,28 @@ export function createBattle({ app, onExit, onOpenGuide }) {
 
   /* ---- banners and cards ----------------------------------------------------- */
 
-  function showBanner(kicker, title) {
+  function showBanner(kicker, title, sub = "") {
     el.bannerKicker.textContent = kicker;
     el.bannerTitle.textContent = title;
-    el.banner.hidden = false;
+    el.bannerSub.textContent = sub;
+    el.bannerSub.hidden = !sub;
     clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(() => { el.banner.hidden = true; }, reducedMotion ? 1800 : 2300);
+    clearTimeout(bannerOutTimer);
+    el.banner.classList.remove("is-out");
+    el.banner.hidden = false;
+    const stay = (sub ? 3200 : 2300) - (reducedMotion ? 500 : 0);
+    bannerTimer = setTimeout(() => {
+      el.banner.classList.add("is-out");
+      bannerOutTimer = setTimeout(() => { el.banner.hidden = true; el.banner.classList.remove("is-out"); }, 260);
+    }, stay);
   }
 
   function showCard(kind, nodes, focusId) {
     cardKind = kind;
     clearTimeout(bannerTimer);
+    clearTimeout(bannerOutTimer);
     el.banner.hidden = true;
+    el.banner.classList.remove("is-out");
     el.card.replaceChildren(...nodes);
     el.cardWrap.hidden = false;
     closeInfo();
@@ -761,15 +786,28 @@ export function createBattle({ app, onExit, onOpenGuide }) {
 
   function who() { return app.state.person.name || "Billy"; }
 
+  /* A big drawn icon at the top of a card, so the card shows before it tells. */
+  function hero(type, cls = "") {
+    const c = h("canvas", { class: `card-hero ${cls}`, width: 72, height: 72, "aria-hidden": "true" });
+    requestAnimationFrame(() => drawIcon(c, renderer.palette, type));
+    return c;
+  }
+
+  /* Phase pips for a card: which phases are done, which is next. */
+  function phaseDots(doneCount, total) {
+    return h("ol", { class: "card-dots", "aria-label": `Phase ${doneCount} of ${total}` },
+      ...Array.from({ length: total }, (_, i) => h("li", { class: `card-dot ${i < doneCount ? "is-done" : ""}` })));
+  }
+
   function showIntroCard() {
     showCard("intro", [
+      hero(level.icon),
       h("p", { class: "card-kicker", text: `${level.threatKind} · Age ${level.age}` }),
       h("h2", { class: "card-title", id: "card-title", text: level.title }),
       h("p", { class: "card-copy", text: personalise(level.intro, who()) }),
       h("p", { class: "card-fact", text: level.teaches }),
-      h("p", { class: "card-next", text: `First, place your Sentries. The threat arrives in ${level.calm} seconds — or tap Start when ready.` }),
       h("div", { class: "card-actions" },
-        h("button", { class: "btn btn-primary btn-block", id: "card-go", onclick: () => { unlockAudio(); hideCard(); } }, "Begin")),
+        h("button", { class: "btn btn-primary btn-block", id: "card-go", onclick: () => { unlockAudio(); hideCard(); } }, "Place your Sentries")),
     ], "card-go");
   }
 
@@ -777,17 +815,16 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     const done = level.phases[game.phaseIndex];
     const next = level.phases[game.phaseIndex + 1];
     showCard("interlude", [
-      h("p", { class: "card-kicker", text: `Phase ${game.phaseIndex + 1} of ${level.phases.length} complete · ${done.bodyTime}` }),
+      hero(done.icon, "is-done"),
+      phaseDots(game.phaseIndex + 1, level.phases.length),
+      h("p", { class: "card-kicker", text: done.bodyTime }),
       h("h2", { class: "card-title", id: "card-title", text: done.name }),
       h("p", { class: "card-fact", text: done.fact }),
-      h("p", { class: "card-next" },
-        h("strong", { text: `Next: ${next.name} (${next.bodyTime}). ` }),
-        personalise(next.hint, who())),
       h("div", { class: "card-actions" },
         h("button", {
           class: "btn btn-primary btn-block", id: "card-go",
           onclick: () => { continueInterlude(game); hideCard(); },
-        }, "Continue")),
+        }, `Next: ${next.name}`)),
     ], "card-go");
   }
 
@@ -797,9 +834,13 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     const stars = h("p", { class: "card-stars", "aria-label": `${o.stars} of 3 stars` },
       ...[1, 2, 3].map((k) => h("span", { class: k <= o.stars ? "on" : "", text: "★" })));
     const reached = o.won ? level.phases : level.phases.slice(0, Math.max(0, game.phaseIndex));
+    // The arc retold as a list of icon + one short line per phase.
     const recap = reached.length
-      ? [h("p", { class: "card-copy", text: `What happened in ${name}'s body:` }),
-        h("ol", { class: "card-recap" }, ...reached.map((p) => h("li", { text: p.recap })))]
+      ? [h("ol", { class: "card-recap" }, ...reached.map((p) => {
+        const ic = h("canvas", { class: "recap-icon", width: 28, height: 28, "aria-hidden": "true" });
+        requestAnimationFrame(() => drawIcon(ic, renderer.palette, p.icon));
+        return h("li", {}, ic, h("span", { text: p.recap }));
+      }))]
       : [];
     const nodes = [];
     if (o.won) {
@@ -807,24 +848,24 @@ export function createBattle({ app, onExit, onOpenGuide }) {
         h("p", { class: "card-kicker", text: `${level.title} · won` }),
         h("h2", { class: "card-title", id: "card-title", text: `${name} is better!` }),
         stars,
-        h("p", { class: "card-copy", text: `Health left: ${o.host}. ${o.stars === 3 ? "Barely a scratch." : o.stars === 2 ? "A rough few days, but through it." : "A close one."}` }),
+        h("p", { class: "card-copy", text: `Health ${o.host} · ${o.stars === 3 ? "Barely a scratch." : o.stars === 2 ? "A rough few days." : "A close one."}` }),
         ...recap,
       );
       if (o.rewards?.veteran) {
-        nodes.push(h("p", { class: "card-reward", text: `${name} now carries a Veteran for this flu. Next time it shows up, Bounty Hunters will be ready from the start — that is how vaccines work.` }));
+        nodes.push(h("p", { class: "card-reward" }, hero("star", "is-inline"), h("span", { text: "Veteran earned. Bounty Hunters start ready next time." })));
       }
       const nextLevel = app.nextLevelAfter(level.id);
       nodes.push(h("div", { class: "card-actions" },
         nextLevel ? h("button", { class: "btn btn-primary btn-block", id: "card-go", onclick: () => exit({ next: nextLevel.id }) }, `Next: ${nextLevel.title}`) : null,
-        !nextLevel ? h("p", { class: "card-copy", text: `That's the end of ${name}'s childhood so far. More of their life is coming.` }) : null,
+        !nextLevel ? h("p", { class: "card-copy", text: "More of their life is coming." }) : null,
         h("button", { class: "btn btn-block", onclick: () => restart() }, "Play again"),
         h("button", { class: `btn btn-block ${nextLevel ? "" : "btn-primary"}`, id: nextLevel ? null : "card-go", onclick: () => exit({}) }, `${name}'s life`)));
     } else {
       const tip = (level.loseTips || {})[o.cause] || Object.values(level.loseTips || {})[0] || "";
       nodes.push(
+        hero("alarm"),
         h("p", { class: "card-kicker", text: `${level.title} · lost` }),
         h("h2", { class: "card-title", id: "card-title", text: `${name} got much sicker.` }),
-        h("p", { class: "card-copy", text: "The body lost this round. Try again — here's what went wrong:" }),
         h("p", { class: "card-fact", text: tip }),
         ...recap,
         h("div", { class: "card-actions" },
@@ -843,8 +884,8 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     paused = true;
     const p = currentPhase(game);
     el.pausePhase.textContent = game.mode === "calm"
-      ? `${level.title}: placing Sentries.`
-      : `${level.title}: ${p ? `${p.name} (${p.bodyTime})` : ""}.`;
+      ? `${level.title} · placing Sentries`
+      : `${level.title} · ${p ? p.name : ""}`;
     el.pauseSound.textContent = `Sound: ${app.state.settings.sound ? "on" : "off"}`;
     openSheet("pause-sheet", { onClosed: () => { paused = false; lastNow = performance.now(); } });
   }

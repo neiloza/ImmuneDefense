@@ -36,7 +36,7 @@ export function createScreens(app) {
   function renderLife() {
     const name = who();
     $("life-title").textContent = `${name}'s life`;
-    $("life-sub").textContent = `You are ${name}'s immune system. Every level is one thing that happens to them, and you fight it the way the body really does.`;
+    $("life-sub").textContent = `You are ${name}'s immune system.`;
 
     const nextId = LEVELS.find((l) => isUnlocked(app.state, l.id) && !(app.state.progress[l.id]?.wins > 0))?.id;
     const stages = STAGES.map((stage) => {
@@ -45,7 +45,7 @@ export function createScreens(app) {
       const list = open ? h("ul", { class: "level-list" }, ...levels.map((lv) => h("li", {}, levelCard(lv, lv.id === nextId)))) : null;
       const later = stage.later.length
         ? [h("ul", { class: "later-list", "aria-label": "Coming later" }, ...stage.later.map((t) => h("li", { class: "later-item", text: t }))),
-          open ? h("p", { class: "later-note", text: "More of this stage is coming." }) : h("p", { class: "later-note", text: "Coming later." })]
+          h("p", { class: "later-note", text: "Coming later." })]
         : [];
       return h("section", { class: `stage ${open ? "" : "stage-locked"}` },
         h("div", { class: "stage-head" },
@@ -73,11 +73,11 @@ export function createScreens(app) {
       "aria-label": `${lv.title}, age ${lv.age}. ${unlocked ? `${stars} of 3 stars` : "Locked — win the level before it"}`,
       onclick: () => openLoadout(lv.id),
     },
-    h("span", { class: "level-age" }, "Age", h("b", { text: String(lv.age) })),
+    h("span", { class: "level-icon-wrap" }, unlocked ? icon(lv.icon, 52) : h("span", { class: "level-lock", "aria-hidden": "true", text: "🔒" })),
     h("span", { class: "level-main" },
-      h("p", { class: "level-kind", text: lv.threatKind }),
+      h("p", { class: "level-kind", text: `Age ${lv.age} · ${lv.threatKind}` }),
       h("p", { class: "level-title", text: lv.title }),
-      h("p", { class: "level-intro", text: unlocked ? personalise(lv.intro, who()) : "Win the level before this one to unlock it." })),
+      h("p", { class: "level-intro", text: unlocked ? personalise(lv.intro, who()) : "Win the level before it." })),
     h("span", { class: "level-stars", "aria-hidden": "true" },
       ...[1, 2, 3].map((k) => h("span", { class: k <= stars ? "on" : "", text: "★" }))));
   }
@@ -135,16 +135,17 @@ export function createScreens(app) {
         const useless = uselessHere(level, id);
         const flag = required ? "Required" : level.newCells.includes(id) ? "New"
           : useless || (def.needsFingerprint ? "Needs training" : null);
+        const kind = def.kind === "sentry" ? "Sentry" : "Aim";
         return h("button", {
           class: `cell-tile ${picked ? "is-picked" : ""} ${required ? "is-required" : ""}`,
           type: "button",
           "aria-pressed": picked ? "true" : "false",
           disabled: !!useless && !picked,
           onclick: () => {
-            if (required) { toast(`${def.name} is required — this level is about it.`); return; }
+            if (required) { toast(`${def.name} is required here.`); return; }
             if (picked) pick = pick.filter((c) => c !== id);
             else if (pick.length < level.slots) pick.push(id);
-            else { toast(`Only ${level.slots} slots. Tap a picked cell to swap it out.`); return; }
+            else { toast(`Only ${level.slots} slots. Tap one to swap.`); return; }
             refresh();
           },
         },
@@ -152,10 +153,13 @@ export function createScreens(app) {
         icon(id),
         h("span", {},
           h("p", { class: "cell-name", text: def.name }),
-          h("p", { class: "cell-real", text: `${def.realName} · ${def.kind === "sentry" ? "Sentry" : "Aim"} · ${def.cost} Signal` })),
+          h("p", { class: "cell-real", text: def.realName }),
+          h("span", { class: "cell-meta" },
+            h("span", { class: `pill pill-${kind.toLowerCase()}`, text: kind }),
+            h("span", { class: "pill pill-cost", text: `${def.cost} Signal` }))),
         h("p", { class: "cell-line", text: def.line }));
       }));
-      count.textContent = `Pick ${need} — ${pick.length} of ${level.slots} slots used`;
+      count.textContent = `${pick.length} of ${level.slots} picked`;
       start.disabled = pick.length < need;
       start.textContent = pick.length < need ? `Pick ${need - pick.length} more` : `Start: ${level.title}`;
     }
@@ -163,9 +167,11 @@ export function createScreens(app) {
 
     $("loadout-title").textContent = `${level.title} · age ${level.age}`;
     $("loadout-body").replaceChildren(
-      h("p", { class: "loadout-intro", text: personalise(level.intro, who()) }),
-      h("p", { class: "loadout-teaches", text: level.teaches }),
-      h("p", { class: "sheet-copy", text: "Sentries float where you put them and fight on their own. Aimed cells go wherever you send them." }),
+      h("div", { class: "loadout-head" },
+        icon(level.icon, 56),
+        h("div", {},
+          h("p", { class: "loadout-intro", text: personalise(level.intro, who()) }),
+          h("p", { class: "loadout-teaches", text: level.teaches }))),
       count, grid, start);
     openSheet("loadout-sheet");
   }
@@ -220,8 +226,8 @@ export function createScreens(app) {
       h("div", { class: "cell-tile is-required" },
         icon(e.type),
         h("span", {}, h("p", { class: "cell-name", text: e.name }), h("p", { class: "cell-real", text: e.real }))),
-      h("p", { class: "guide-real-job" }, h("strong", { text: "In the game: " }), e.line),
-      h("p", { class: "guide-real-job" }, h("strong", { text: "In real life: " }), e.realJob),
+      h("p", { class: "guide-real-job" }, h("strong", { text: "In the game " }), e.line),
+      h("p", { class: "guide-real-job" }, h("strong", { text: "In real life " }), e.realJob),
       e.rows.length ? h("dl", { class: "guide-row" }, ...e.rows.flatMap(([k, v]) => [h("dt", { text: k }), h("dd", { text: v })])) : null,
     );
     openSheet("entry-sheet");
@@ -254,7 +260,7 @@ export function createScreens(app) {
       h("section", { class: "guide-section" },
         h("h2", { class: "guide-section-title", text: "What happens in the body" }),
         facts.length ? h("ol", { class: "fact-list" }, ...facts)
-          : h("p", { class: "view-sub", text: "Finish a phase of any level and what happened in the body is written down here." })),
+          : h("p", { class: "view-sub", text: "Finish a phase to fill this in." })),
     );
   }
 
@@ -308,7 +314,7 @@ export function createScreens(app) {
         const text = await f.text().catch(() => "");
         const next = importState(text);
         fileInput.value = "";
-        if (!next) { toast("That file is not an Immune Defense backup."); return; }
+        if (!next) { toast("Not an Immune Defense backup."); return; }
         app.replaceState(next);
         toast("Progress restored.");
       },
@@ -324,17 +330,17 @@ export function createScreens(app) {
         h("h2", { class: "panel-head", text: "Play" }),
         toggle("Sound", app.state.settings.sound, (v) => app.setSound(v)),
         toggle("Hints", app.state.settings.hints, (v) => { app.state.settings.hints = v; app.persist(); },
-          "Coaching tips during a battle. Turn off once you know your way around.")),
+          "Coaching tips during battles.")),
       h("div", { class: "panel settings-group" },
         h("h2", { class: "panel-head", text: "Your progress" }),
-        h("p", { class: "settings-note", text: "Progress lives on this device only. Save a backup file to move it to another phone or keep it safe." }),
+        h("p", { class: "settings-note", text: "Progress stays on this device. Back it up to move it." }),
         h("div", { class: "settings-actions" },
           h("button", { class: "btn btn-block", type: "button", onclick: exportProgress }, "Save a backup file"),
           h("button", { class: "btn btn-block", type: "button", onclick: () => fileInput.click() }, "Restore from a backup file"),
           fileInput,
           h("button", {
             class: "btn btn-danger btn-block", type: "button",
-            onclick: () => confirm("Reset all progress? Stars, Veterans and the Field Guide go back to the start. Your person's name stays.", () => {
+            onclick: () => confirm("Reset all progress? Stars, Veterans and the Guide restart.", () => {
               const fresh = defaultState();
               fresh.person.name = app.state.person.name;
               fresh.settings = { ...app.state.settings };
@@ -345,11 +351,11 @@ export function createScreens(app) {
       h("div", { class: "panel settings-group" },
         h("h2", { class: "panel-head", text: "For testers" }),
         toggle("Unlock all levels", app.state.tester.unlockAll, (v) => { app.state.tester.unlockAll = v; app.persist(); renderLife(); },
-          "Opens every level without winning the one before. For playtesting; it does not change any rules.")),
+          "Opens every level. Rules unchanged.")),
       h("div", { class: "panel settings-group" },
         h("h2", { class: "panel-head", text: "About" }),
-        h("p", { class: "settings-note", text: "No accounts, no ads, no tracking. Nothing you do here leaves this device." }),
-        h("p", { class: "settings-note", text: "The biology is simplified for play, and it has not yet been checked by a doctor. Treat the Field Guide as a starting point, not medical advice." }),
+        h("p", { class: "settings-note", text: "No ads, no accounts, no tracking." }),
+        h("p", { class: "settings-note", text: "Biology simplified, not yet doctor-checked. Not medical advice." }),
         buildLine),
     );
   }

@@ -7,41 +7,42 @@
  * screen. This file only holds what exists nowhere else.
  *
  * Entries unlock the first time the player meets them (store.js `seen`,
- * keyed by these ids, which are therefore permanent).
+ * keyed by these ids, which are therefore permanent). Each `line` is ten
+ * words at most (test/unit/copy.test.mjs).
  * ========================================================================= */
 
 export const TERMS = [
   {
     id: "term:signal", name: "Signal", realName: "Cytokines",
-    line: "The chemical messages that call cells in. Every cell you deploy costs Signal, and it refills over time.",
+    line: "Chemical calls for help. Deploys cost it; it refills.",
   },
   {
     id: "term:host", name: "Host Health", realName: "How your person feels",
-    line: "Threats that reach the bloodstream, cells that burst, and runaway inflammation all make your person feel worse.",
+    line: "How your person feels. Leaks, bursts and storms lower it.",
   },
   {
     id: "term:hidden", name: "Hidden threats", realName: "Detection",
-    line: "The body can't fight what it hasn't found. Threats stay a faint redness until a Scout is close enough to reveal them.",
+    line: "Threats stay a faint glow until a Scout is near.",
   },
   {
     id: "term:fingerprint", name: "Fingerprint", realName: "Antigen",
-    line: "The unique shape of one invader. A Scout samples it and carries it to the Barracks, which trains specialists against that one shape.",
+    line: "One invader's unique shape. Scouts carry it to train specialists.",
   },
   {
     id: "term:barracks", name: "Barracks", realName: "Lymph node",
-    line: "Where Scouts bring Fingerprints and specialists are trained. Training takes time — the real delay is several days.",
+    line: "Where specialists train against a Fingerprint. Takes days.",
   },
   {
     id: "term:veteran", name: "Veteran", realName: "Memory cell",
-    line: "Specialists that stay behind after a win. Next time the same invader shows up, the body is ready from the start — which is how vaccines work.",
+    line: "Specialists that stay behind. Next time, ready from the start.",
   },
   {
     id: "term:alarm", name: "Alarm", realName: "Inflammation",
-    line: "Swelling, heat and redness. It speeds up Signal and repair, but above 60 it damages the tissue, and at 100 it becomes a cytokine storm.",
+    line: "Inflammation. Speeds Signal and repair; above 60 it damages.",
   },
   {
     id: "term:healing", name: "Healing", realName: "Tissue repair",
-    line: "Once the threat is cleared, the body rebuilds. Debris and pus in the way stop it; so does too much inflammation.",
+    line: "Repair after the threat clears. Debris and pus block it.",
   },
 ];
 

@@ -67,7 +67,7 @@
     <!-- ===== FIELD GUIDE ===== -->
     <section class="view" id="view-guide" aria-labelledby="guide-title">
       <h1 class="view-title" id="guide-title">Field Guide</h1>
-      <p class="view-sub">Every cell and threat, in plain words and by its real name. Entries unlock the first time you meet them.</p>
+      <p class="view-sub">Everything you've met, in plain words.</p>
       <div id="guide-list"></div>
     </section>
 
@@ -148,12 +148,13 @@
       <canvas class="battle-canvas" id="battle-canvas" role="img"
               aria-label="The battle map. Tap to place and aim cells."></canvas>
       <div class="calm-bar" id="calm-bar" hidden>
-        <span class="calm-text" id="calm-text">Threat arrives in 15s</span>
+        <span class="calm-text" id="calm-text">Threat in 15s</span>
         <button class="btn btn-primary btn-small" id="calm-start">Start now</button>
       </div>
       <div class="banner" id="banner" hidden aria-hidden="true">
         <p class="banner-kicker" id="banner-kicker"></p>
         <p class="banner-title" id="banner-title"></p>
+        <p class="banner-sub" id="banner-sub" hidden></p>
       </div>
       <div class="info-pop" id="info-pop" hidden role="dialog" aria-labelledby="info-name">
         <canvas class="info-icon" id="info-icon" width="44" height="44" aria-hidden="true"></canvas>
@@ -199,11 +200,11 @@
         <h2 class="sheet-title" id="name-title">Who are you protecting?</h2>
       </div>
       <form class="sheet-body name-form" id="name-form">
-        <p class="sheet-copy">You are their immune system. Give them a name — the game follows them from childhood on.</p>
+        <p class="sheet-copy">You're their immune system, from childhood on.</p>
         <label class="field-label" for="name-input">Their name</label>
         <input class="field-input" id="name-input" name="name" type="text" autocomplete="off"
                autocapitalize="words" spellcheck="false" maxlength="16" placeholder="Billy" autofocus>
-        <p class="field-help">Up to 16 letters. You can change it later in Settings.</p>
+        <p class="field-help">Change it later in Settings.</p>
         <button class="btn btn-primary btn-block" type="submit" id="name-save">Start their life</button>
       </form>
     </div>
@@ -235,7 +236,7 @@
         <button class="btn btn-block" id="pause-guide">Field Guide</button>
         <button class="btn btn-block" id="pause-restart">Restart level</button>
         <button class="btn btn-block" id="pause-sound">Sound: on</button>
-        <button class="btn btn-danger btn-block" id="pause-quit">Leave the level</button>
+        <button class="btn btn-danger btn-block" id="pause-quit">Leave</button>
       </div>
     </div>
   </div>

@@ -25,9 +25,32 @@ cause.** Say which one you have.
 
 ## Current status (as of 2026-09-28)
 
-**Build 1. The first playable slice: Childhood's first three levels.** Built
-in one session from the design in [`docs/DESIGN.md`](./docs/DESIGN.md);
+**Build 2. The first playable slice, after a UI, graphics and animation
+pass.** Built from the design in [`docs/DESIGN.md`](./docs/DESIGN.md);
 nobody has played it on a real phone yet (see *Waiting on a human*).
+
+Build 2 (the polish pass) changed, on top of build 1:
+
+- **Every player-facing string is ten words or fewer** — cards, hints,
+  facts, recaps, tips, cell and threat descriptions, Field Guide terms,
+  toasts, settings notes. `test/unit/copy.test.mjs` fails on the eleventh
+  word. The between-phase card is now icon + one fact line + a "Next: …"
+  button; the phase's hint moved onto the phase banner, where it is read at
+  the moment it applies.
+- **Sprites** have shaded bodies, drop shadows, blinking eyes with
+  catchlights, cheeks on your cells; Rushers stretch and leave speed lines;
+  Devourers gulp; bacteria wriggle; virus spikes pulse. Four symbol icons
+  (heal, alarm, star, fingerprint) stand for phases on cards.
+- **Motion:** things pop in, hit units jitter, kills leave a shrinking
+  ghost, bursts and leaks shake the map, the Alarm past 60 burns the edges,
+  the heal zone sparkles; in the HTML, meters ease, the Host bar flashes on
+  a hit, stars pop in one by one, the recap list slides in, the tray button
+  the coach means pulses, buttons press. All off under
+  `prefers-reduced-motion` (CSS block at the end of `game.css`; the canvas
+  reads `ui.reducedMotion`).
+- **Backgrounds:** lit gradients, a vignette, glossy vessels, hairs on the
+  skin, motes in the airway.
+- Level cards and the loadout head carry the level's threat icon.
 
 Built and working in a desktop Chromium with a phone viewport:
 
@@ -55,9 +78,10 @@ Built and working in a desktop Chromium with a phone viewport:
 - **Coaching** in all three levels, off with the Hints switch.
 - **PWA:** installable, works offline, network-first worker, real icon set,
   strict CSP in `_headers`, build number in the UI.
-- **Tests:** 33 unit tests (every one watched failing by
-  `scripts/mutation-check.mjs`), a 61-check browser smoke test that plays
-  Cut to the end, deploy and docs pre-flights. `npm test` is green.
+- **Tests:** 37 unit tests (every rule watched failing by
+  `scripts/mutation-check.mjs`, 23 mutations), a 61-check browser smoke
+  test that plays Cut to the end, deploy and docs pre-flights. `npm test`
+  is green.
 
 ### Difficulty, as measured by bots (2026-09-28, `npm run balance`, 20 seeds)
 
@@ -246,11 +270,11 @@ leverage.
 | `js/data/levels.js` | The three levels, their phases and coaching, the life map |
 | `js/data/guide.js` | Field Guide terms |
 | `js/render/renderer.js` | Draws a game state onto the canvas |
-| `js/render/sprites.js` | Every cell and threat, drawn in code |
+| `js/render/sprites.js` | Every cell and threat, drawn in code, plus the card symbols; `ICON_TYPES` |
 | `js/render/palette.js` | Reads the palette out of `css/tokens.css` |
 | `icons/source.svg` | The one icon source; `npm run icons` builds the rest |
 | `icons/build-icons.cjs` | The kit's opaque-verified icon builder |
-| `test/unit/` | Unit tests (`node --test`) |
+| `test/unit/` | Unit tests (`node --test`): sim, levels, store, copy length |
 | `test/bots.mjs` | Scripted players: idle, casual, good, reckless |
 | `test/serve.mjs` | Static server that applies the real `_headers` |
 | `test/smoke.mjs` | The browser smoke test |
@@ -347,6 +371,12 @@ leverage.
 - Educational copy is written for a ten-year-old and checked by an adult who
   knows the biology. Level intros avoid pronouns — the player names the
   person, and the name alone works.
+- **Ten words, hard limit, for anything a player reads in play.** Cards,
+  hints, facts, recaps, tips, descriptions, toasts, settings notes.
+  `test/unit/copy.test.mjs` enforces it on `js/data/` and the static
+  paragraphs of `index.html`; strings built in `battle.js` and `screens.js`
+  are held to it by review. If a fact needs more, it is a Field Guide entry,
+  not a card. A "word" is a whitespace token with a letter or digit in it.
 
 ## Testing
 
@@ -354,7 +384,7 @@ leverage.
 npm test                        # everything below except the last two
 node scripts/check-deploy.mjs   # production-only failure modes (121 checks)
 node scripts/check-docs.mjs     # doc links, anchors, this file map
-npm run test:unit               # 33 unit tests on the sim, data and store (~1 s)
+npm run test:unit               # 37 unit tests on the sim, data, copy and store (~1 s)
 npm run test:smoke              # the browser smoke test (61 checks, ~40 s)
 npm run balance                 # difficulty report (not a test)
 node scripts/mutation-check.mjs # proves the unit tests can fail (~1 min)
@@ -372,8 +402,8 @@ What each layer is for:
   Note what the offline check does **not** prove: the smoke test reloads
   after the worker takes control, so the fetch handler has already cached
   every module. SHELL completeness is `check-deploy.mjs`'s job.
-- **The mutation check** breaks 22 rules one at a time and fails if the unit
-  tests do not notice. Run it after changing tests or rules. Every assertion
+- **The mutation check** breaks 23 rules one at a time (the last lengthens
+  a card to eleven words) and fails if the unit tests do not notice. Run it after changing tests or rules. Every assertion
   in the smoke test that was added in this build was also watched failing by
   hand (Escape stack, auto-pause, drag-deploy).
 

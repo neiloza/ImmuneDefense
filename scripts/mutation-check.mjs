@@ -54,6 +54,8 @@ const MUTATIONS = [
   // The level data: without the trickle, a Flu player who never samples the
   // virus runs the lining out of cells and the level can never end.
   ["Flu's virus trickle removed", LEVELS_JS, "        trickle: { type: \"virus\", every: 4, where: \"top\", until: \"trained\" },\n", ""],
+  // The copy rule: a card that grows an eleventh word must fail the suite.
+  ["a card grows an eleventh word", LEVELS_JS, "fact: \"Skin broke. Bacteria slipped in; a clot plugs the gap.\",", "fact: \"Skin broke. Bacteria slipped in; a clot plugs the gap now.\",",],
 ];
 
 const survivors = [];
