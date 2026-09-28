@@ -1,0 +1,120 @@
+/* ============================================================================
+ * tokens.css — the palette contract.
+ *
+ * This is the ONE file you rewrite when you retheme the app. Everything else
+ * consumes these names and never hard-codes a colour, a radius or a shadow —
+ * INCLUDING THE CANVAS: js/render/palette.js reads the game tokens below out
+ * of the computed style at startup, so the battle art and the HTML around it
+ * can never drift apart. Rename a token here and palette.js must follow.
+ *
+ * The concept is a STAINED MICROSCOPE SLIDE. Real tissue under a microscope
+ * is dyed with two stains: eosin turns cytoplasm pink, hematoxylin turns
+ * nuclei purple. So the whole app lives in that pair — slide-glass white,
+ * eosin pink, hematoxylin purple — and anything that is not the body (every
+ * threat) is drawn in colours the stains never produce: acid green, yellow,
+ * orange. A player should be able to tell friend from enemy in grayscale by
+ * shape, and in colour at a glance.
+ *
+ * Red and green in the UI are semantic (yes/no, good/bad) and never brand.
+ * The ENEMY green is a game-art colour for bacteria, not a UI signal — it is
+ * deliberately more yellow and more acid than --good so the two never read
+ * as the same thing.
+ * ========================================================================= */
+
+:root {
+  /* --- surfaces: slide glass, faintly warm ------------------------------- */
+  --bg:            #fbf3f2;
+  --bg-raised:     #ffffff;
+  --bg-sunken:     #f3e6e5;
+
+  /* --- ink: hematoxylin, darkened until it reads as text ----------------- */
+  --ink:           #24172b;
+  --ink-soft:      #58465f;
+  --ink-faint:     #86738c;
+
+  /* --- accent: the ink you press — hematoxylin purple -------------------- */
+  --accent:          #5b3690;
+  --accent-soft:     #744eab;
+  --accent-contrast: #ffffff;
+
+  /* --- structure --------------------------------------------------------- */
+  --line:          #ead8d7;
+  --line-strong:   #d6bcbb;
+
+  /* --- semantic only. Never brand. -------------------------------------- */
+  --good:          #2c6349;
+  --good-bg:       #e6efea;
+  --bad:           #9a2e36;
+  --bad-bg:        #f7e7e7;
+
+  /* --- shape ------------------------------------------------------------- */
+  --radius:        16px;
+  --radius-sm:     12px;
+  --radius-pill:   999px;
+
+  --shadow-sm: 0 1px 2px rgb(36 23 43 / 0.06);
+  --shadow-md: 0 2px 6px rgb(36 23 43 / 0.07), 0 10px 24px -12px rgb(36 23 43 / 0.18);
+  --shadow-lg: 0 6px 16px rgb(36 23 43 / 0.12), 0 20px 44px -16px rgb(36 23 43 / 0.26);
+
+  /* --- type: system stack. No webfont — it would be the only third-party
+   * request the app makes, and the typeface is not doing identity work. */
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: ui-rounded, "SF Pro Rounded", var(--font-body);
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* --- safe areas: behind variables so every anchored element derives from
+   * ONE number, and a notch can be faked in desktop devtools. --safe-b is the
+   * iOS home indicator, NOT a browser URL bar; nothing pads on top of it
+   * "just in case". */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+
+  /* --- chrome heights ---------------------------------------------------- */
+  --topbar-h: 56px;
+  --tabbar-h: 58px;
+
+  /* ======================================================================
+   * GAME TOKENS — read by js/render/palette.js for the canvas.
+   * ==================================================================== */
+
+  /* The body. Tissue is eosin pink; it reddens as the Alarm rises, which is
+   * the whole point of showing inflammation on the map rather than only on a
+   * meter (docs/DESIGN.md, Art direction). */
+  --tissue:          #f4dcdc;
+  --tissue-shade:    #ebc9ca;
+  --tissue-inflamed: #e88a8a;
+  --skin:            #ecc3b2;
+  --skin-deep:       #d9a08f;
+  --clot:            #8e2a35;
+  --vessel:          #c0405a;
+  --vessel-dark:     #8a2238;
+  --blood:           #a82a3c;
+  --rbc:             #d9485a;
+  --airway:          #eef1f6;
+  --lining:          #e7c2d2;
+  --lining-dead:     #c9b7ba;
+  --bone:            #f3ecda;
+  --bone-shade:      #d8ccb0;
+  --hematoma:        #7a2230;
+  --callus:          #e8dcc0;
+  --node:            #b79ad6;
+
+  /* Your cells: pale bodies with hematoxylin nuclei, like a blood smear. */
+  --ally-body:       #fbf7ff;
+  --ally-outline:    #b9a2d6;
+  --ally-nucleus:    #6b3fa0;
+  --builder:         #ead7ad;
+
+  /* Threats: colours the stains never make. */
+  --enemy:           #9bcb3b;
+  --enemy-dark:      #5a7d1c;
+  --enemy-alt:       #e0a526;
+  --enemy-alt-dark:  #9a6a0e;
+  --debris:          #a38f7a;
+  --pus:             #e8dc9a;
+
+  /* Meters. */
+  --signal:          #3a7bd5;
+  --alarm:           #d6453d;
+  --heal:            #3f9a6b;
+}

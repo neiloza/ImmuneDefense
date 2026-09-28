@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" fill="#5b3690"/><g transform="translate(56.3 56.3) scale(0.78)"><!-- Immune Defense: a Devourer (macrophage) eyeing a bacterium, on a
+       hematoxylin-purple plate (the plate itself is added by build-icons.cjs,
+       BACKGROUND). Everything that matters sits inside the centre 80% circle
+       so the maskable crop cannot clip it. Generated from the same blob
+       function as js/render/sprites.js drawDevourer, so the icon and the
+       in-game cell are the same shape. -->
+  <circle cx="256" cy="256" r="236" fill="#6c45a3"/>
+  <path d="M390.4 236.0L383.4 250.3L374.7 263.2L366.4 275.0L359.8 286.5L355.2 298.6L352.0 312.1L348.7 326.9L343.9 341.9L336.3 355.7L325.3 366.6L311.3 373.1L295.5 374.8L279.3 372.2L264.0 366.8L250.3 360.9L238.0 356.6L226.3 355.1L213.9 356.9L200.0 361.1L184.2 365.9L167.0 368.9L149.6 368.3L133.9 362.8L121.7 352.3L113.8 337.9L110.5 321.2L110.6 304.1L112.5 288.0L114.2 273.6L114.0 260.7L111.3 248.5L106.4 236.0L100.7 222.5L96.2 207.8L94.7 192.5L97.4 177.8L104.7 164.8L115.8 154.4L129.2 146.7L143.1 141.1L156.1 136.2L167.5 130.5L177.4 122.6L186.8 112.4L196.9 100.4L208.6 88.3L222.5 78.3L238.0 72.6L254.1 72.5L269.4 78.4L282.5 89.3L292.9 103.5L300.8 118.4L307.4 132.1L314.1 143.3L322.5 151.5L333.3 157.8L346.6 163.4L361.1 170.2L374.9 179.3L385.9 191.1L392.6 205.3L393.9 220.6L390.4 236.0Z" fill="#fbf7ff" stroke="#c9b3e6" stroke-width="10" stroke-linejoin="round"/>
+  <ellipse cx="196" cy="282" rx="48" ry="29" transform="rotate(-28 196 282)" fill="#6b3fa0"/>
+  <circle cx="186" cy="214" r="9" fill="#a38f7a" opacity="0.55"/>
+  <circle cx="300" cy="300" r="7" fill="#a38f7a" opacity="0.55"/>
+  <ellipse cx="236" cy="200" rx="20" ry="23" fill="#ffffff" stroke="#e6dcf2" stroke-width="3"/>
+  <ellipse cx="290" cy="200" rx="20" ry="23" fill="#ffffff" stroke="#e6dcf2" stroke-width="3"/>
+  <circle cx="244" cy="208" r="11" fill="#24172b"/>
+  <circle cx="298" cy="208" r="11" fill="#24172b"/>
+  <circle cx="248" cy="204" r="3.5" fill="#ffffff"/>
+  <circle cx="302" cy="204" r="3.5" fill="#ffffff"/>
+  <g transform="rotate(-38 352 356)">
+    <path d="M294 356 q-14 -14 -28 0 t-28 0" fill="none" stroke="#5a7d1c" stroke-width="8" stroke-linecap="round"/>
+    <rect x="294" y="330" width="116" height="54" rx="27" fill="#9bcb3b" stroke="#5a7d1c" stroke-width="8"/>
+    <circle cx="370" cy="352" r="9" fill="#ffffff"/>
+    <circle cx="392" cy="352" r="9" fill="#ffffff"/>
+    <circle cx="372" cy="354" r="5" fill="#24172b"/>
+    <circle cx="394" cy="354" r="5" fill="#24172b"/>
+    <path d="M360 338 l18 7 M404 338 l-18 7" stroke="#24172b" stroke-width="4" stroke-linecap="round"/>
+  </g></g></svg>

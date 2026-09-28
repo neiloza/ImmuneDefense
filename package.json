@@ -1,0 +1,20 @@
+{
+  "name": "immunedefense",
+  "private": true,
+  "type": "module",
+  "//": "Dev-only. There are no runtime dependencies and no build step — the browser loads the files in this repo as they are. This file exists so the test runner and the icon builder are PINNED rather than installed ad hoc, which is how a tool stops working a year later. Nothing here ships to the browser.",
+  "//playwright": "Pinned EXACTLY, not with ^, because the agent sandbox ships one pre-installed Chromium (/opt/pw-browsers, revision 1194) and that browser matches Playwright 1.56. A caret range quietly installs a newer Playwright whose protocol may not drive it. On a laptop run `npx playwright install chromium` once after `npm install`.",
+  "scripts": {
+    "test": "node scripts/check-deploy.mjs && node scripts/check-docs.mjs && node --test \"test/unit/*.test.mjs\" && node test/smoke.mjs",
+    "test:unit": "node --test \"test/unit/*.test.mjs\"",
+    "test:smoke": "node test/smoke.mjs",
+    "check": "node scripts/check-deploy.mjs && node scripts/check-docs.mjs",
+    "balance": "node scripts/balance.mjs",
+    "icons": "node icons/build-icons.cjs",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "2.6.2",
+    "playwright": "1.56.1"
+  }
+}

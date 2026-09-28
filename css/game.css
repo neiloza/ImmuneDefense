@@ -1,0 +1,524 @@
+/* ============================================================================
+ * game.css — everything that is this game rather than the shared shell:
+ * the life map, the loadout, the Field Guide, settings, and the battle.
+ *
+ * Same conventions as components.css: flat kebab-case with a component
+ * prefix, colours only through tokens.css, every :hover rule inside the one
+ * @media (hover: hover) block at the bottom.
+ * ========================================================================= */
+
+body.sheet-open { overflow: hidden; }
+
+.brand-icon { width: 28px; height: 28px; border-radius: 8px; flex: none; }
+
+.build-chip {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  color: var(--ink-faint);
+  font: 700 0.68rem/1.4 var(--font-mono);
+}
+
+.view-title { margin: 4px 0 4px; font-size: 1.5rem; font-weight: 800; }
+.view-sub { margin: 0 0 16px; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.45; }
+
+.btn-small { min-height: 36px; padding: 6px 12px; font-size: 0.82rem; }
+.icon-btn-small { width: 36px; height: 36px; }
+
+.sheet-copy { margin: 0 0 14px; color: var(--ink-soft); line-height: 1.45; }
+.sheet-tall { max-height: 92dvh; }
+
+.field-label { display: block; margin: 0 0 6px; font-weight: 800; font-size: 0.85rem; }
+.field-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--ink);
+  font-size: 1.1rem;           /* ≥16px, or iOS zooms the page on focus */
+  font-weight: 700;
+}
+.field-help { margin: 6px 0 16px; color: var(--ink-faint); font-size: 0.8rem; }
+
+/* ---------- life map ----------------------------------------------------- */
+
+.life-head { margin: 4px 0 14px; }
+.life-title { margin: 0 0 4px; font-size: 1.5rem; font-weight: 800; }
+.life-sub { margin: 0; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.45; }
+
+.stage { margin: 0 0 18px; }
+.stage-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin: 0 0 8px; padding: 0 2px;
+}
+.stage-name { margin: 0; font-size: 1.05rem; font-weight: 800; }
+.stage-ages { color: var(--ink-faint); font-weight: 700; font-size: 0.8rem; }
+.stage-locked .stage-name { color: var(--ink-faint); }
+
+.level-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.level-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  cursor: pointer;
+}
+.level-card:disabled { cursor: not-allowed; opacity: 0.55; box-shadow: none; }
+.level-card.is-next { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent), var(--shadow-sm); }
+
+.level-age {
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 14px;
+  background: var(--bg-sunken);
+  color: var(--accent);
+  font: 800 0.72rem/1.1 var(--font-display);
+  text-align: center;
+}
+.level-age b { display: block; font-size: 1.2rem; }
+.level-main { min-width: 0; }
+.level-title { margin: 0 0 2px; font-weight: 800; font-size: 1rem; }
+.level-kind { margin: 0 0 3px; color: var(--accent); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.level-intro { margin: 0; color: var(--ink-soft); font-size: 0.85rem; line-height: 1.35; }
+.level-stars { font-size: 1rem; letter-spacing: 1px; color: var(--line-strong); white-space: nowrap; }
+.level-stars .on { color: #e3a91f; }
+
+.later-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.later-item {
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--line-strong);
+  color: var(--ink-faint);
+  font-size: 0.78rem; font-weight: 700;
+}
+.later-note { margin: 8px 2px 0; color: var(--ink-faint); font-size: 0.78rem; }
+
+.veterans { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+
+/* ---------- cell tiles (loadout, guide) ----------------------------------- */
+
+.cell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px 10px; padding-top: 6px; }
+
+.cell-tile {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--ink);
+  cursor: pointer;
+}
+.cell-tile.is-picked { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+.cell-tile.is-required { cursor: default; }
+.cell-tile:disabled { opacity: 0.5; cursor: not-allowed; }
+.cell-icon { width: 44px; height: 44px; }
+.cell-name { margin: 0; font-weight: 800; font-size: 0.92rem; }
+.cell-real { margin: 0; color: var(--ink-faint); font-size: 0.72rem; font-weight: 700; }
+.cell-line { margin: 4px 0 0; color: var(--ink-soft); font-size: 0.76rem; line-height: 1.3; grid-column: 1 / -1; }
+.cell-flag {
+  position: absolute; top: -9px; right: 10px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.cell-flag-new { background: var(--accent); color: var(--accent-contrast); }
+
+.loadout-intro { margin: 0 0 4px; font-size: 1.05rem; font-weight: 800; line-height: 1.35; }
+.loadout-teaches { margin: 0 0 14px; color: var(--ink-soft); font-size: 0.86rem; }
+.loadout-count { margin: 0 0 8px; font-weight: 800; font-size: 0.85rem; color: var(--ink-soft); }
+.loadout-start { margin-top: 16px; }
+
+/* ---------- field guide --------------------------------------------------- */
+
+.guide-section { margin: 0 0 20px; }
+.guide-section-title { margin: 0 0 8px; font-size: 1rem; font-weight: 800; }
+.guide-entry.is-locked .cell-name { color: var(--ink-faint); }
+.guide-real-job { margin: 8px 0 0; color: var(--ink-soft); line-height: 1.45; }
+.guide-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin: 12px 0 0; font-size: 0.86rem; }
+.guide-row dt { color: var(--ink-faint); font-weight: 800; }
+.guide-row dd { margin: 0; }
+.fact-list { margin: 0; padding-left: 20px; color: var(--ink-soft); line-height: 1.5; font-size: 0.88rem; }
+.fact-list li { margin: 0 0 8px; }
+.fact-level { color: var(--ink); font-weight: 800; }
+
+/* ---------- settings ------------------------------------------------------ */
+
+.settings-group { margin: 0 0 14px; }
+.settings-group .panel-head { margin-bottom: 10px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+.settings-row + .settings-row { border-top: 1px solid var(--line); }
+.settings-label { font-weight: 700; }
+.settings-note { margin: 6px 0 0; color: var(--ink-faint); font-size: 0.8rem; line-height: 1.4; }
+.settings-actions { display: grid; gap: 8px; }
+.build-line { font: 600 0.8rem/1.5 var(--font-mono); color: var(--ink-soft); word-break: break-all; }
+.file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.switch {
+  position: relative; width: 52px; height: 32px; flex: none;
+  border-radius: var(--radius-pill); border: 0;
+  background: var(--line-strong); cursor: pointer;
+}
+.switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #fff; box-shadow: var(--shadow-sm);
+  transition: transform 150ms ease;
+}
+.switch[aria-checked="true"] { background: var(--accent); }
+.switch[aria-checked="true"]::after { transform: translateX(20px); }
+
+/* ==========================================================================
+ * THE BATTLE
+ * A fixed full-screen column: HUD, stage (the canvas fills it), tray. The
+ * stage is flex:1 with min-height:0 so it takes exactly what the HUD and the
+ * tray leave — the canvas is sized from it by a ResizeObserver, never by
+ * guessing a height (LESSONS 5.3: a new control must fit the geometry that is
+ * already computed).
+ * ======================================================================== */
+
+body.in-battle { overflow: hidden; }
+/* In a battle the toast would land on the tray (its usual spot is above the
+ * tab bar, which is hidden here). Put it just under the HUD instead; --hud-h
+ * is kept current by battle.js from the HUD's measured height. */
+body.in-battle .toast {
+  top: calc(var(--hud-h, 90px) + 10px);
+  bottom: auto;
+  transform: translateX(-50%) translateY(-8px);
+}
+body.in-battle .toast.show { transform: translateX(-50%) translateY(0); }
+body.in-battle .topbar,
+body.in-battle .container,
+body.in-battle .tabbar { display: none; }
+
+.battle {
+  position: fixed; inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  background: var(--tissue-shade);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.battle[hidden] { display: none; }
+
+.battle-hud {
+  flex: none;
+  padding: calc(var(--safe-t) + 6px) 10px 6px;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 5px;
+}
+
+.hud-top { display: flex; align-items: center; gap: 8px; }
+.hud-person { flex: 1; min-width: 0; }
+.hud-person-line { display: flex; align-items: baseline; gap: 8px; margin: 0 0 3px; }
+.hud-name { font-weight: 800; font-size: 0.98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+.hud-mood { color: var(--ink-soft); font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.hud-btn {
+  flex: none;
+  min-width: 44px; height: 44px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  color: var(--ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.meter {
+  position: relative;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  overflow: hidden;
+}
+.meter-fill {
+  position: absolute; inset: 0 auto 0 0;
+  width: 100%;
+  border-radius: inherit;
+  transform-origin: left center;
+}
+.meter-host .meter-fill { background: var(--heal); }
+.meter-host.is-low .meter-fill { background: var(--enemy-alt); }
+.meter-host.is-critical .meter-fill { background: var(--alarm); }
+.meter-alarm .meter-fill { background: var(--alarm); }
+.meter-heal .meter-fill { background: var(--heal); }
+.meter-heal.is-blocked .meter-fill { background: var(--ink-faint); }
+
+/* The healing band of the Alarm (20–60), drawn on the meter itself so the
+ * number a player aims for is visible, not memorised. */
+.meter-band {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--ink);
+  opacity: 0.55;
+}
+.meter-band-low { left: 20%; }
+.meter-band-high { left: 60%; }
+
+.hud-phase { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.phase-track { list-style: none; margin: 0; padding: 0; display: flex; gap: 3px; flex: none; }
+.phase-pip { width: 18px; height: 6px; border-radius: var(--radius-pill); background: var(--line-strong); }
+.phase-pip.is-done { background: var(--accent-soft); }
+.phase-pip.is-now { background: var(--accent); width: 26px; }
+.phase-label {
+  margin: 0; min-width: 0;
+  font-size: 0.8rem; font-weight: 800; color: var(--ink-soft);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.hud-meters { display: grid; gap: 4px; }
+.hud-meters:empty { display: none; }
+.meter-block { display: grid; grid-template-columns: 58px 1fr 38px; align-items: center; gap: 8px; }
+.meter-block[hidden] { display: none; }
+.meter-name { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+.meter-num { font: 800 0.8rem/1 var(--font-display); text-align: right; }
+
+.battle-stage {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.battle-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  /* The canvas owns every gesture: no scroll, no pinch-zoom, no double-tap
+   * zoom delay. Without this a drag-select scrolls the page on iOS. */
+  touch-action: none;
+}
+
+.calm-bar {
+  position: absolute; left: 50%; top: 10px;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 6px 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+}
+.calm-bar[hidden] { display: none; }
+.calm-text { font-weight: 800; font-size: 0.85rem; }
+
+.coach {
+  position: absolute; left: 10px; right: 10px; bottom: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  color: var(--bg);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+.coach[hidden] { display: none; }
+.coach-text { margin: 0; font-size: 0.84rem; font-weight: 700; line-height: 1.35; }
+/* The info pop-up takes the coach's place while it is open. */
+.info-pop:not([hidden]) ~ .coach { display: none; }
+
+/* Centred with auto margins and fit-content rather than left:50% plus a
+ * translate: with left:50% the box can only shrink-wrap into the right half
+ * of the stage, and a title like "Bounty Hunters ready" broke onto three
+ * lines. */
+.banner {
+  position: absolute; left: 16px; right: 16px; top: 30%;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 10px 22px 12px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--bg-raised) 92%, transparent);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  pointer-events: none;
+  animation: banner-in 260ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@keyframes banner-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: none; } }
+.banner[hidden] { display: none; }
+.banner-kicker { margin: 0; font-weight: 800; font-size: 0.85rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+.banner-title {
+  margin: 2px 0 0;
+  font: 800 1.6rem/1.15 var(--font-display);
+  color: var(--ink);
+}
+
+.info-pop {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-lg);
+}
+.info-pop[hidden] { display: none; }
+.info-icon { width: 40px; height: 40px; }
+.info-name { margin: 0; font-weight: 800; }
+.info-real { margin: 0; color: var(--ink-faint); font-size: 0.72rem; font-weight: 700; }
+.info-line { margin: 2px 0 0; color: var(--ink-soft); font-size: 0.78rem; line-height: 1.3; }
+.info-actions { display: flex; align-items: center; gap: 6px; }
+
+.battle-tray {
+  flex: none;
+  padding: 6px 8px max(8px, var(--safe-b));
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  border-top: 1px solid var(--line);
+}
+.signal-row { display: grid; grid-template-columns: auto 1fr 26px; align-items: center; gap: 8px; margin: 0 2px 6px; }
+.signal-name { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--signal); }
+.signal-bar {
+  position: relative; height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  overflow: hidden;
+}
+/* Ten segments, one per point of Signal, so a cost can be read off the bar. */
+.signal-bar::after {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), var(--bg) calc(10% - 2px) 10%);
+}
+.signal-fill { position: absolute; inset: 0 auto 0 0; width: 100%; background: var(--signal); transform-origin: left center; }
+.signal-num { font: 800 0.9rem/1 var(--font-display); text-align: right; color: var(--signal); }
+
+.tray { display: flex; gap: 6px; }
+.tray-cell {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 74px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  gap: 1px;
+  padding: 5px 2px 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: none;
+}
+.tray-cell.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+  transform: translateY(-3px);
+}
+.tray-cell.is-poor .tray-icon,
+.tray-cell.is-poor .tray-name { opacity: 0.45; }
+.tray-cell.is-locked { background: var(--bg-sunken); }
+.tray-icon { width: 34px; height: 34px; }
+.tray-name {
+  max-width: 100%;
+  font-size: 0.72rem; font-weight: 800; line-height: 1.1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tray-real {
+  max-width: 100%;
+  font-size: 0.58rem; font-weight: 700; color: var(--ink-faint);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tray-cost {
+  position: absolute; top: 3px; right: 4px;
+  min-width: 18px; height: 18px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--signal);
+  color: #fff;
+  font: 800 0.7rem/1 var(--font-display);
+}
+.tray-kind {
+  position: absolute; top: 3px; left: 4px;
+  font-size: 0.56rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.tray-lock {
+  position: absolute; inset: auto 3px 3px 3px;
+  padding: 1px 2px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 0.56rem; font-weight: 800; text-align: center;
+}
+
+/* ---------- battle cards (intro, between phases, end) --------------------- */
+
+.card-wrap {
+  position: absolute; inset: 0;
+  z-index: 5;
+  display: grid; place-items: center;
+  padding: calc(var(--safe-t) + 16px) 16px calc(var(--safe-b) + 16px);
+  background: rgb(36 23 43 / 0.45);
+  overflow-y: auto;
+}
+.card-wrap[hidden] { display: none; }
+.battle-card {
+  width: 100%; max-width: 440px;
+  padding: 20px;
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-lg);
+  animation: card-in 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.card-kicker { margin: 0 0 4px; color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+.card-title { margin: 0 0 8px; font: 800 1.45rem/1.2 var(--font-display); }
+.card-copy { margin: 0 0 12px; color: var(--ink-soft); line-height: 1.5; }
+.card-fact {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--bg-sunken);
+  line-height: 1.5;
+}
+.card-next { margin: 0 0 16px; font-weight: 700; line-height: 1.45; }
+.card-actions { display: grid; gap: 8px; }
+.card-stars { margin: 0 0 6px; font-size: 2rem; letter-spacing: 4px; color: var(--line-strong); }
+.card-stars .on { color: #e3a91f; }
+.card-recap { margin: 0 0 14px; padding-left: 20px; line-height: 1.5; color: var(--ink-soft); }
+.card-recap li { margin: 0 0 6px; }
+.card-reward {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--good-bg);
+  color: var(--good);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+@keyframes card-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.pause-body { display: grid; gap: 8px; }
+
+/* ---------- pointer-only affordances -------------------------------------
+ * Every :hover rule for this file lives here (house rule 10b): iOS Safari
+ * sticks :hover to the last-tapped element otherwise. */
+@media (hover: hover) {
+  .level-card:not(:disabled):hover { border-color: var(--accent); }
+  .cell-tile:not(:disabled):hover { border-color: var(--accent-soft); }
+  .tray-cell:hover { border-color: var(--accent-soft); }
+  .hud-btn:hover { border-color: var(--line-strong); }
+}

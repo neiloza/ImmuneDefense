@@ -1,0 +1,20 @@
+{
+  "name": "Immune Defense — be the immune system",
+  "short_name": "Immune",
+  "description": "Be the immune system of someone you name. A tower defense game where every level is a real illness, and you win the way the body really does.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf3f2",
+  "theme_color": "#fbf3f2",
+  "categories": ["games", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "icons/icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "icons/icon-1024.png", "type": "image/png", "sizes": "1024x1024" },
+    { "src": "icons/icon-192-maskable.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
+    { "src": "icons/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
+    { "src": "icons/favicon.svg", "type": "image/svg+xml", "sizes": "any" }
+  ]
+}

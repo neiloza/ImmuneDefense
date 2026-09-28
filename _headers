@@ -1,0 +1,61 @@
+# Cloudflare Pages response headers. This file is PRODUCTION CONFIGURATION,
+# and the smoke test serves the app through it (test/smoke.mjs parses this
+# file), because the CSP below is strict enough to break the app — and the
+# alternative is finding that out on a phone with no console open
+# (GameHub setup/LESSONS.md 1.6).
+#
+# The app makes NO third-party requests of any kind: no fonts, no analytics,
+# no accounts yet. That is why every directive can be 'self'. When accounts
+# or payment arrive, read GameHub setup/INFRASTRUCTURE.md "CSP, CORS and the
+# service worker" first — a new origin needs connect-src AND img-src, because
+# inside the service worker an image is a fetch(), not an <img>.
+#
+# No 'unsafe-inline' anywhere. index.html carries no inline <script> and no
+# style="" attributes, and JavaScript only sets styles through the CSSOM
+# (element.style.foo = …), which style-src does not govern. Adding an inline
+# script (the kit's before-first-paint theme script, say) needs a hash here or
+# it is silently blocked. scripts/check-deploy.mjs fails the build on one.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; media-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+# The worker must never be cached, or a broken one outlives the deploy meant
+# to replace it and the only user-side cure is clearing site data
+# (LESSONS 1.2). scripts/check-deploy.mjs fails if this weakens.
+/sw.js
+  Cache-Control: no-store, must-revalidate
+
+# Not "no caching": the browser keeps the bytes and revalidates, so an
+# unchanged file costs a 304. A long max-age would mean the worker's own
+# network-first fetch reads the browser cache and never sees a new deploy
+# (LESSONS 1.9).
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Served as anything else, the install offer never appears and nothing says
+# why (LESSONS 1.8).
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=0, must-revalidate
+
+# A no-build deploy publishes the whole repo. These are dev-only and harmless,
+# but they should not be indexed. A conscious trade, not an accident.
+/docs/*
+  X-Robots-Tag: noindex
+/test/*
+  X-Robots-Tag: noindex
+/scripts/*
+  X-Robots-Tag: noindex
+/README.md
+  X-Robots-Tag: noindex
+/CLAUDE.md
+  X-Robots-Tag: noindex
+/package.json
+  X-Robots-Tag: noindex

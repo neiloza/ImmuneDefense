@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover: the page paints UNDER the status bar and home
+       indicator, and CSS reserves those strips with env(safe-area-inset-*).
+       user-scalable stays ON for the menus (accessibility); the battle
+       canvas stops pinch-zoom itself with touch-action: none. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Be the immune system of someone you name. A tower defense game where every level is a real illness, and you win the way the body really does.">
+  <!-- Matches the very top of the app background, so iOS tints the status
+       bar strip the same colour as the page. -->
+  <meta name="theme-color" content="#fbf3f2">
+
+  <title>Immune Defense</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+
+  <!-- iOS ignores most of the manifest and wants its own tags. Without
+       `capable`, the home-screen icon opens an ordinary Safari tab. -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Immune">
+  <meta name="format-detection" content="telephone=no">
+
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/game.css">
+
+  <!-- NO inline <script> and NO style="" attributes anywhere in this file:
+       _headers ships a CSP without 'unsafe-inline', and scripts/check-deploy.mjs
+       fails the build on either. The kit's before-first-paint theme script
+       was removed with the themes — this app has one palette. -->
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-icon" src="./icons/favicon.svg" alt="" width="28" height="28">
+      <span class="brand-name">Immune Defense</span>
+      <span class="build-chip" id="build-chip" title="Build running on this device">b1</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost install-btn hidden" id="install-btn"
+              aria-label="Add Immune Defense to your home screen">
+        <span class="install-btn-icon" aria-hidden="true">⬇</span>
+        <span class="install-btn-label">Install</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ===== LIFE: the level map ===== -->
+    <section class="view active" id="view-life" aria-labelledby="life-title">
+      <div class="life-head">
+        <h1 class="life-title" id="life-title">Your person's life</h1>
+        <p class="life-sub" id="life-sub"></p>
+      </div>
+      <div id="life-stages"></div>
+    </section>
+
+    <!-- ===== FIELD GUIDE ===== -->
+    <section class="view" id="view-guide" aria-labelledby="guide-title">
+      <h1 class="view-title" id="guide-title">Field Guide</h1>
+      <p class="view-sub">Every cell and threat, in plain words and by its real name. Entries unlock the first time you meet them.</p>
+      <div id="guide-list"></div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section class="view" id="view-settings" aria-labelledby="settings-title">
+      <h1 class="view-title" id="settings-title">Settings</h1>
+      <div id="settings-body"></div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar" id="tabbar" aria-label="Main">
+    <div class="tabbar-inner">
+      <button class="tab active" data-view="life" aria-current="page">
+        <span class="tab-icon" aria-hidden="true">🧬</span>
+        <span class="tab-label">Life</span>
+      </button>
+      <button class="tab" data-view="guide">
+        <span class="tab-icon" aria-hidden="true">📖</span>
+        <span class="tab-label">Field Guide</span>
+      </button>
+      <button class="tab" data-view="settings">
+        <span class="tab-icon" aria-hidden="true">⚙️</span>
+        <span class="tab-label">Settings</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== BATTLE =====
+       A full-screen layer over the shell. This is a deliberate break from
+       house rule 3 (topbar → views → tabbar everywhere), written down here as
+       the rule asks: in a battle the thumb is aiming cells at the bottom of
+       the screen, where a tab bar would sit under it, and the map needs the
+       whole height. The shell is back the moment the battle ends. -->
+  <section class="battle" id="battle" hidden aria-label="Battle">
+    <header class="battle-hud">
+      <div class="hud-top">
+        <div class="hud-person">
+          <div class="hud-person-line">
+            <span class="hud-name" id="hud-name">Billy</span>
+            <span class="hud-mood" id="hud-mood">feeling fine</span>
+          </div>
+          <div class="meter meter-host" id="hud-host" role="meter" aria-label="Host Health"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+            <div class="meter-fill" id="hud-host-fill"></div>
+          </div>
+        </div>
+        <button class="hud-btn" id="hud-speed" aria-label="Game speed, currently normal">1×</button>
+        <button class="hud-btn" id="hud-pause" aria-label="Pause">❚❚</button>
+      </div>
+      <div class="hud-phase">
+        <ol class="phase-track" id="phase-track" aria-hidden="true"></ol>
+        <p class="phase-label" id="phase-label"></p>
+      </div>
+      <div class="hud-meters">
+        <div class="meter-block" id="alarm-block" hidden>
+          <span class="meter-name">Alarm</span>
+          <div class="meter meter-alarm" id="alarm-meter" role="meter" aria-label="Alarm"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="meter-fill" id="alarm-fill"></div>
+            <span class="meter-band meter-band-low" aria-hidden="true"></span>
+            <span class="meter-band meter-band-high" aria-hidden="true"></span>
+          </div>
+          <span class="meter-num" id="alarm-num">0</span>
+        </div>
+        <div class="meter-block" id="heal-block" hidden>
+          <span class="meter-name" id="heal-name">Healing</span>
+          <div class="meter meter-heal" role="meter" aria-label="Healing"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="heal-meter">
+            <div class="meter-fill" id="heal-fill"></div>
+          </div>
+          <span class="meter-num" id="heal-num">0%</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="battle-stage" id="battle-stage">
+      <canvas class="battle-canvas" id="battle-canvas" role="img"
+              aria-label="The battle map. Tap to place and aim cells."></canvas>
+      <div class="calm-bar" id="calm-bar" hidden>
+        <span class="calm-text" id="calm-text">Threat arrives in 15s</span>
+        <button class="btn btn-primary btn-small" id="calm-start">Start now</button>
+      </div>
+      <div class="banner" id="banner" hidden aria-hidden="true">
+        <p class="banner-kicker" id="banner-kicker"></p>
+        <p class="banner-title" id="banner-title"></p>
+      </div>
+      <div class="info-pop" id="info-pop" hidden role="dialog" aria-labelledby="info-name">
+        <canvas class="info-icon" id="info-icon" width="44" height="44" aria-hidden="true"></canvas>
+        <div class="info-text">
+          <p class="info-name" id="info-name"></p>
+          <p class="info-real" id="info-real"></p>
+          <p class="info-line" id="info-line"></p>
+        </div>
+        <div class="info-actions">
+          <button class="btn btn-danger btn-small" id="info-retire" hidden>Retire</button>
+          <button class="icon-btn icon-btn-small" id="info-close" aria-label="Close">✕</button>
+        </div>
+      </div>
+      <div class="coach" id="coach" hidden role="status" aria-live="polite">
+        <p class="coach-text" id="coach-text"></p>
+      </div>
+    </div>
+
+    <footer class="battle-tray">
+      <div class="signal-row">
+        <span class="signal-name">Signal</span>
+        <div class="signal-bar" id="signal-bar" role="meter" aria-label="Signal"
+             aria-valuemin="0" aria-valuemax="10" aria-valuenow="10">
+          <div class="signal-fill" id="signal-fill"></div>
+        </div>
+        <span class="signal-num" id="signal-num">10</span>
+      </div>
+      <div class="tray" id="tray" role="toolbar" aria-label="Deploy cells"></div>
+    </footer>
+
+    <!-- Intro, between-phase and end cards all render into this one card. -->
+    <div class="card-wrap" id="card-wrap" hidden>
+      <div class="battle-card" id="battle-card" role="dialog" aria-modal="true" aria-labelledby="card-title"></div>
+    </div>
+  </section>
+
+  <!-- ===== name your person (first launch; sticky: it has to be answered,
+       and it offers a default so answering is one tap) ===== -->
+  <div class="overlay" id="name-sheet" data-sticky hidden>
+    <div class="overlay-backdrop"></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="name-title">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="name-title">Who are you protecting?</h2>
+      </div>
+      <form class="sheet-body name-form" id="name-form">
+        <p class="sheet-copy">You are their immune system. Give them a name — the game follows them from childhood on.</p>
+        <label class="field-label" for="name-input">Their name</label>
+        <input class="field-input" id="name-input" name="name" type="text" autocomplete="off"
+               autocapitalize="words" spellcheck="false" maxlength="16" placeholder="Billy" autofocus>
+        <p class="field-help">Up to 16 letters. You can change it later in Settings.</p>
+        <button class="btn btn-primary btn-block" type="submit" id="name-save">Start their life</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== loadout ===== -->
+  <div class="overlay" id="loadout-sheet" hidden>
+    <div class="overlay-backdrop" data-sheet-close></div>
+    <div class="sheet sheet-tall" role="dialog" aria-modal="true" aria-labelledby="loadout-title">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="loadout-title">Loadout</h2>
+        <button class="icon-btn" data-sheet-close aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-body" id="loadout-body"></div>
+    </div>
+  </div>
+
+  <!-- ===== pause ===== -->
+  <div class="overlay" id="pause-sheet" hidden>
+    <div class="overlay-backdrop" data-sheet-close></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="pause-title">Paused</h2>
+        <button class="icon-btn" data-sheet-close aria-label="Resume">✕</button>
+      </div>
+      <div class="sheet-body pause-body">
+        <p class="sheet-copy" id="pause-phase"></p>
+        <button class="btn btn-primary btn-block" data-sheet-close id="pause-resume">Resume</button>
+        <button class="btn btn-block" id="pause-guide">Field Guide</button>
+        <button class="btn btn-block" id="pause-restart">Restart level</button>
+        <button class="btn btn-block" id="pause-sound">Sound: on</button>
+        <button class="btn btn-danger btn-block" id="pause-quit">Leave the level</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== a Field Guide entry, openable from anywhere (including over the
+       pause sheet — which is why Escape closes only the topmost) ===== -->
+  <div class="overlay" id="entry-sheet" hidden>
+    <div class="overlay-backdrop" data-sheet-close></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="entry-title">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="entry-title">Field Guide</h2>
+        <button class="icon-btn" data-sheet-close aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-body" id="entry-body"></div>
+    </div>
+  </div>
+
+  <!-- ===== confirm (reset progress) ===== -->
+  <div class="overlay" id="confirm-sheet" hidden>
+    <div class="overlay-backdrop" data-sheet-close></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="confirm-title">Are you sure?</h2>
+        <button class="icon-btn" data-sheet-close aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-body">
+        <p class="sheet-copy" id="confirm-copy"></p>
+        <button class="btn btn-danger btn-block" id="confirm-yes">Yes</button>
+        <button class="btn btn-block" data-sheet-close>Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== install sheet ===== -->
+  <div class="overlay" id="install-overlay" role="dialog" aria-modal="true"
+       aria-labelledby="install-title" hidden>
+    <div class="overlay-backdrop" data-install-close data-sheet-close></div>
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="install-title">Add to Home Screen</h2>
+        <button class="icon-btn" id="install-close" data-install-close data-sheet-close
+                aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-body" id="install-body"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

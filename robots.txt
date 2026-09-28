@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /docs/
+Disallow: /test/
+Disallow: /scripts/
+Disallow: /README.md
+Disallow: /CLAUDE.md
+Disallow: /package.json
