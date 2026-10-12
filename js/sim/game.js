@@ -92,7 +92,7 @@ export function createGame(level, opts = {}) {
       status: "unknown", carrier: null, trainStarted: null, trainEnds: null,
     };
   }
-  // Fingerprints the body already knows (a Veteran from an earlier level).
+  // Antigens the body already knows (a Memory cell from an earlier level).
   // Not used by the three slice levels; kept so later levels and the tests
   // can start with specialists trained.
   for (const fp of opts.known || []) {
@@ -553,7 +553,7 @@ function updateScout(state, s, dt) {
   }
 
   // At its post. The first Scout to touch an unknown invader takes its
-  // Fingerprint and walks it to the Barracks — leaving its post unwatched
+  // Antigen and walks it to the Lymph node — leaving its post unwatched
   // while it goes, which is the real cost of the learning track.
   if (!b) return;
   const fp = state.fingerprints[b.fingerprint];

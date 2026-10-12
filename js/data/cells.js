@@ -31,11 +31,11 @@ export const CELLS = {
     radius: 0.34,          // body size, for drawing and for bacteria latching on
     holds: 2,              // bacteria it can hold off at once before the rest slip past
     sight: 3,              // hidden threats inside this radius are revealed
-    sampleRange: 1.3,      // touching distance for taking a Fingerprint
-    carrySpeed: 1.6,       // tiles/s while walking a Fingerprint to the Barracks
+    sampleRange: 1.3,      // touching distance for taking an Antigen
+    carrySpeed: 1.6,       // tiles/s while walking an Antigen to the Lymph node
     targets: [],
     line: "Spots hidden threats nearby.",
-    job: "Reveals hidden threats. Carries Fingerprints to the Barracks.",
+    job: "Reveals hidden threats. Carries Antigens to the Lymph node.",
     realJob: "Samples invaders and shows them to T cells.",
     goodAgainst: ["Hidden threats"],
   },
@@ -126,11 +126,11 @@ export const CELLS = {
     sense: 1.6,            // recognises its target this close, revealed or not
     leash: 3,
     copyCap: 12,           // clonal copies per level, so the swarm stays readable
-    // Locked until the Barracks has trained against this Fingerprint.
+    // Locked until the Lymph node has trained against this Antigen.
     needsFingerprint: "flu",
     targets: ["infected"],
     line: "Aim at infected cells. Each kill makes a copy.",
-    job: "Kills infected cells with its Fingerprint. Copies itself per kill.",
+    job: "Kills infected cells with its Antigen. Copies itself per kill.",
     realJob: "Kills infected cells showing its target, then multiplies.",
     goodAgainst: ["Infected cells"],
   },

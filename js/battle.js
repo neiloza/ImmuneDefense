@@ -208,16 +208,16 @@ export function createBattle({ app, onExit, onOpenGuide }) {
           if (markSeen(app.state, [`threat:${e.threat}`])) seenDirty = true;
           break;
         case "sample":
-          toast("Fingerprint taken. Heading to the Barracks.");
+          toast("Antigen taken. Heading to the Lymph node.");
           break;
         case "sampleLost":
-          toast("Fingerprint lost. Another Scout must sample again.");
+          toast("Antigen lost. Another Scout must sample again.");
           break;
         case "training":
           if (markSeen(app.state, ["term:fingerprint", "term:barracks"])) seenDirty = true;
           break;
         case "trained":
-          showBanner("The Barracks", "Bounty Hunters ready", "Tap one, then tap an infected cell.");
+          showBanner("The Lymph node", "Bounty Hunters ready", "Tap one, then tap an infected cell.");
           break;
         case "storm":
           showBanner("Alarm hit 100", "Cytokine storm!", "Retire Sirens. Clear debris.");
@@ -368,7 +368,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
     const def = CELLS[id];
     if (!def.needsFingerprint) return null;
     const fp = game.fingerprints[def.needsFingerprint];
-    if (!fp) return "No Barracks";
+    if (!fp) return "No Lymph node";
     if (fp.status === "ready") return null;
     if (fp.status === "training") return `Training ${Math.max(0, Math.ceil(fp.trainEnds - game.t))}s`;
     if (fp.status === "carrying") return "On its way";
@@ -410,9 +410,9 @@ export function createBattle({ app, onExit, onOpenGuide }) {
   }
 
   function lockExplanation(id, lock) {
-    if (lock === "No Barracks") return `No Barracks here, so no ${CELLS[id].name}s.`;
+    if (lock === "No Lymph node") return `No Lymph node here, so no ${CELLS[id].name}s.`;
     if (lock.startsWith("Training")) return `Training. ${lock.replace("Training ", "")} to go.`;
-    if (lock === "On its way") return "The Fingerprint is on its way.";
+    if (lock === "On its way") return "The Antigen is on its way.";
     return "Needs training. Get a Scout next to the virus.";
   }
 
@@ -852,7 +852,7 @@ export function createBattle({ app, onExit, onOpenGuide }) {
         ...recap,
       );
       if (o.rewards?.veteran) {
-        nodes.push(h("p", { class: "card-reward" }, hero("star", "is-inline"), h("span", { text: "Veteran earned. Bounty Hunters start ready next time." })));
+        nodes.push(h("p", { class: "card-reward" }, hero("star", "is-inline"), h("span", { text: "Memory cell earned. Bounty Hunters start ready next time." })));
       }
       const nextLevel = app.nextLevelAfter(level.id);
       nodes.push(h("div", { class: "card-actions" },

@@ -67,7 +67,7 @@ for (const level of LEVELS) {
       const keys = Object.keys(p.end || {});
       assert.ok(keys.length > 0, `${p.id}: a phase with no end condition ends instantly`);
       for (const k of keys) assert.ok(END_KEYS.has(k), `${p.id}: unknown end condition ${k}`);
-      if (p.end.trained) assert.equal(p.end.trained, level.barracks?.fingerprint, `${p.id}: trains a Fingerprint this level has`);
+      if (p.end.trained) assert.equal(p.end.trained, level.barracks?.fingerprint, `${p.id}: trains an Antigen this level has`);
       if (p.end.healed != null || p.healing) assert.ok(level.healing, `${p.id}: heals on a level with no Healing bar`);
       if (p.end.cleared) for (const t of p.end.cleared) assert.ok(THREATS[t]);
     }

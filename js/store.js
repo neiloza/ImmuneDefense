@@ -40,7 +40,7 @@ export function defaultState() {
     person: { name: "" },
     // levelId -> { stars, best, wins, plays, lastPlayed }
     progress: {},
-    // fingerprint id -> timestamp earned (a Veteran)
+    // fingerprint id -> timestamp earned (a Memory cell)
     veterans: {},
     // guide entry id -> timestamp first met
     seen: {},

@@ -187,13 +187,13 @@ function fluFixture() {
   });
 }
 
-test("Bounty Hunters unlock exactly when Barracks training finishes", () => {
+test("Bounty Hunters unlock exactly when Lymph node training finishes", () => {
   const level = fluFixture();
   const s = G.createGame(level, { seed: 3, loadout: ["scout", "hunter"] });
   assert.equal(G.deploy(s, "hunter", 4.5, 6.5).reason, "needs-training");
   assert.ok(G.deploy(s, "scout", 4.5, 4.5).ok);
   const started = runUntil(s, (st, ev) => ev.some((e) => e.type === "training"), 60);
-  assert.ok(started.ok, "a Scout carried the Fingerprint in");
+  assert.ok(started.ok, "a Scout carried the Antigen in");
   // Due time from the LEVEL DATA, not from the sim's own event: a test that
   // compared against the sim's reported end time agreed with a sim that
   // trained a second late (scripts/mutation-check.mjs caught it).
@@ -207,7 +207,7 @@ test("Bounty Hunters unlock exactly when Barracks training finishes", () => {
   assert.ok(G.deploy(s, "hunter", 4.5, 6.5).ok);
 });
 
-test("losing the Scout that carries a Fingerprint puts it back to unknown", () => {
+test("losing the Scout that carries an Antigen puts it back to unknown", () => {
   const s = G.createGame(fluFixture(), { seed: 3, loadout: ["scout"] });
   G.deploy(s, "scout", 4.5, 4.5);
   runUntil(s, (st) => G.fingerprintStatus(st, "flu") === "carrying", 60);

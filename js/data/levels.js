@@ -30,7 +30,7 @@
  *   B  bloodstream / deeper tissue — the goal; a threat that reaches it
  *                        costs Host Health
  *   A  airway lining cell (Flu) — what the virus infects
- *   K  Barracks (a lymph node)
+ *   K  Lymph node
  *   X  bone             F  fracture
  * Only `.` and `:` accept a Sentry. Nothing blocks movement: cells squeeze
  * through tissue, so every unit moves in straight lines.
@@ -45,8 +45,8 @@
  *
  * ---- Optional phase behaviour ------------------------------------------------
  *   trickle: {type, every, where, until?}  one more threat every `every`
- *            seconds for the whole phase — or, with `until` (a Fingerprint
- *            id), only while that Fingerprint is untrained
+ *            seconds for the whole phase — or, with `until` (an Antigen
+ *            id), only while that Antigen is untrained
  *   regrow: s      dead airway cells grow back after this many seconds
  *   healing        the level's Healing bar can fill during this phase
  *   builders       Bone Builders walk in and work the fracture
@@ -55,7 +55,7 @@
  *   after: s         at least this long since the phase started
  *   spawnsDone       every spawn scheduled for the phase has happened
  *   cleared: [types] none of these threat types are left on the map
- *   trained: id      the Barracks has finished training this Fingerprint
+ *   trained: id      the Lymph node has finished training this Antigen
  *   healed: pct      the Healing bar has reached this
  * ========================================================================= */
 
@@ -200,12 +200,12 @@ export const LEVELS = [
     ],
     goalLabel: "Deeper lung",
     healing: null,
-    // The lymph node in the neck. A Scout carrying the virus's Fingerprint
+    // The lymph node in the neck. A Scout carrying the virus's Antigen
     // walks here; training takes `trainTime` seconds, then Bounty Hunters
     // unlock for the rest of the level.
-    // `samples` is which threat types carry this Fingerprint: a Scout that
+    // `samples` is which threat types carry this Antigen: a Scout that
     // touches either a free virus or an infected cell can take it.
-    barracks: { x: 8.5, y: 11, fingerprint: "flu", samples: ["virus", "infected"], trainTime: 24, label: "Barracks" },
+    barracks: { x: 8.5, y: 11, fingerprint: "flu", samples: ["virus", "infected"], trainTime: 24, label: "Lymph node" },
     coach: [
       { id: "place-scout", when: "calm", cell: "scout", at: [4.5, 3.6],
         text: "Put a Scout in the airway, above the lining.",
@@ -214,10 +214,10 @@ export const LEVELS = [
         text: "Devourers in the airway eat viruses before they enter cells.",
         done: { placed: "devourer" } },
       { id: "sample", when: "phase:blind",
-        text: "Keep a Scout beside the infection to grab its Fingerprint.",
+        text: "Keep a Scout beside the infection to grab its Antigen.",
         done: { trainingStarted: true } },
       { id: "training", when: "event:training",
-        text: "Barracks training. Slow the spread with Devourers and Rushers.",
+        text: "Lymph node training. Slow the spread with Devourers and Rushers.",
         done: { trained: true } },
       { id: "hunters", when: "event:trained", cell: "hunter",
         text: "Bounty Hunters ready! Tap one, then tap an infected cell.",
@@ -236,7 +236,7 @@ export const LEVELS = [
         id: "blind", name: "Fighting blind", bodyTime: "Days 1–4", icon: "fingerprint",
         hint: "Infected cells burst. Get a Scout next to the virus.",
         fact: "Fever starts. Dendritic cells carry a sample to lymph nodes.",
-        recap: "A Scout carried the Fingerprint to the Barracks.",
+        recap: "A Scout carried the Antigen to the Lymph node.",
         spawns: [{ at: 2, type: "virus", count: 10, every: 1.6, where: "top" }],
         // Until the body has learned the virus, it keeps coming and the lining
         // keeps repairing itself. Without both, a player who never samples

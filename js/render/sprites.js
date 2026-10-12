@@ -31,7 +31,7 @@
  *   look      radians the eyes look toward
  *   moving    true while it moved this tick (speed lines)
  *   gulp      0…1, a Devourer's swallow animation just after an "eat"
- *   carrying  a Scout holding a Fingerprint
+ *   carrying  a Scout holding an Antigen
  *   kills     what a Devourer has eaten (shows as swallowed bits)
  *   working   a Bone Builder at the fracture (bobs)
  * ========================================================================= */
@@ -454,9 +454,9 @@ export function drawPus(ctx, pal, x, y, r, t, seed) {
   ctx.fill();
 }
 
-/* ---- symbols (cards, the life map, the Barracks) ---------------------------- */
+/* ---- symbols (cards, the life map, the Lymph node) ---------------------------- */
 
-/* A carried Fingerprint: a little whorl. Also the Barracks' training icon. */
+/* A carried Antigen: a little whorl. Also the Lymph node's training icon. */
 export function drawFingerprint(ctx, pal, x, y, r) {
   ctx.beginPath();
   ctx.arc(x, y, r, 0, TAU);

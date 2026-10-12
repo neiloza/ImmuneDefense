@@ -25,15 +25,15 @@ export const TERMS = [
     line: "Threats stay a faint glow until a Scout is near.",
   },
   {
-    id: "term:fingerprint", name: "Fingerprint", realName: "Antigen",
+    id: "term:fingerprint", name: "Antigen", realName: "Antigen",
     line: "One invader's unique shape. Scouts carry it to train specialists.",
   },
   {
-    id: "term:barracks", name: "Barracks", realName: "Lymph node",
-    line: "Where specialists train against a Fingerprint. Takes days.",
+    id: "term:barracks", name: "Lymph node", realName: "Lymph node",
+    line: "Where specialists train against an Antigen. Takes days.",
   },
   {
-    id: "term:veteran", name: "Veteran", realName: "Memory cell",
+    id: "term:veteran", name: "Memory cell", realName: "Memory cell",
     line: "Specialists that stay behind. Next time, ready from the start.",
   },
   {

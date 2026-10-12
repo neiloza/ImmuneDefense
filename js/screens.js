@@ -57,7 +57,7 @@ export function createScreens(app) {
 
     const vets = Object.keys(app.state.veterans);
     const vetRow = vets.length
-      ? h("div", { class: "veterans" }, ...vets.map((v) => h("span", { class: "badge badge-good", text: `Veteran: ${v === "flu" ? "Flu" : v}` })))
+      ? h("div", { class: "veterans" }, ...vets.map((v) => h("span", { class: "badge badge-good", text: `Memory cell: ${v === "flu" ? "Flu" : v}` })))
       : null;
     $("life-stages").replaceChildren(...(vetRow ? [vetRow] : []), ...stages);
   }
@@ -85,7 +85,7 @@ export function createScreens(app) {
   /* ---- the loadout ------------------------------------------------------------ */
 
   /* Cells that exist but cannot help in this level. Offered, marked, and not
-   * picked by default — a Bounty Hunter in a level with no Barracks can never
+   * picked by default — a Bounty Hunter in a level with no Lymph node can never
    * be trained, and a loadout slot spent on it is a slot wasted without
    * anything on screen saying why. */
   function uselessHere(level, id) {
@@ -241,7 +241,10 @@ export function createScreens(app) {
         h("span", { class: "cell-icon", "aria-hidden": "true" }),
         h("span", {},
           h("p", { class: "cell-name", text: known ? t.name : "???" }),
-          h("p", { class: "cell-real", text: known ? `Real name: ${t.realName}` : "Not met yet" })),
+          // Antigen, Lymph node and Memory cell use their real names in the game,
+          // so a "Real name" line would only repeat the title.
+          known && t.realName === t.name ? null
+            : h("p", { class: "cell-real", text: known ? `Real name: ${t.realName}` : "Not met yet" })),
         known ? h("p", { class: "cell-line", text: t.line }) : null);
     });
     const facts = LEVELS.flatMap((l) => l.phases
@@ -340,7 +343,7 @@ export function createScreens(app) {
           fileInput,
           h("button", {
             class: "btn btn-danger btn-block", type: "button",
-            onclick: () => confirm("Reset all progress? Stars, Veterans and the Guide restart.", () => {
+            onclick: () => confirm("Reset all progress? Stars, Memory cells and the Guide restart.", () => {
               const fresh = defaultState();
               fresh.person.name = app.state.person.name;
               fresh.settings = { ...app.state.settings };

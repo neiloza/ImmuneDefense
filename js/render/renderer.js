@@ -208,7 +208,7 @@ export function createRenderer(canvas) {
           ring(at.x, at.y, 0.2, 1.1, 0.5, pal.accent);
           break;
         }
-        case "sample": ring(e.x, e.y, 0.2, 1.4, 0.8, pal.accent); floater(e.x, e.y - 0.5, "Fingerprint!", pal.accent); break;
+        case "sample": ring(e.x, e.y, 0.2, 1.4, 0.8, pal.accent); floater(e.x, e.y - 0.5, "Antigen!", pal.accent); break;
         case "training":
         case "trained":
           if (state.level.barracks) ring(state.level.barracks.x, state.level.barracks.y, 0.4, 2.4, 1.2, pal.accent);
@@ -378,7 +378,7 @@ export function createRenderer(canvas) {
     ctx.fillStyle = withAlpha(pal.allyNucleus, 0.85);
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(b.label || "Barracks", 0, 0);
+    ctx.fillText(b.label || "Lymph node", 0, 0);
     ctx.restore();
 
     if (fp && fp.status === "training") {

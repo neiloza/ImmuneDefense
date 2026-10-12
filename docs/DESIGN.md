@@ -39,7 +39,7 @@ Pick your loadout → Place Sentries → Scouts detect threat → Deploy and aim
                           └──────────────────────────────── next phase ───────────────────────────────────┘
 
 LEARNING TRACK (during the fight, from the Flu level on)
-Scout takes a sample → Barracks trains (the learning lag) → Specialist unlocked (e.g. Bounty Hunter) → ready to deploy
+Scout takes a sample → Lymph node trains (the learning lag) → Specialist unlocked (e.g. Bounty Hunter) → ready to deploy
 ```
 
 The main loop repeats every wave. The learning track, from the Flu level on, unlocks specialist cells mid-level.
@@ -59,7 +59,7 @@ The main loop repeats every wave. The learning track, from the Flu level on, unl
 
 **Alarm** (from the Broken bone level). An inflammation meter from 0 to 100. Higher Alarm refills Signal faster, because inflammation is how the body calls in more cells. Above 60 it damages your person's tissue. At 100 you get a cytokine storm: heavy damage everywhere for several seconds.
 
-**Learning lag** (from the Flu level). A Scout that touches a new kind of enemy takes its Fingerprint and leaves its post to carry it to the Barracks. After a training timer, the matching specialist cell unlocks in your deploy tray for the rest of the level.
+**Learning lag** (from the Flu level). A Scout that touches a new kind of enemy takes its Antigen and leaves its post to carry it to the Lymph node. After a training timer, the matching specialist cell unlocks in your deploy tray for the rest of the level.
 
 **Clonal copies.** Each time a Bounty Hunter kills a matching target, it spawns a copy of itself (capped per level).
 
@@ -71,7 +71,7 @@ The main loop repeats every wave. The learning track, from the Flu level on, unl
 2. **Alarm and rush.** The body sounds the alarm and the first Responders flood in.
 3. **Counterattack.** Trained specialists arrive, for threats the fast responders can't finish (germs, not injuries).
 4. **Cleanup and repair.** Dead cells and debris are cleared and tissue rebuilds. The Alarm has to come down.
-5. **Memory.** Winning leaves Veterans for the next time this threat appears.
+5. **Memory.** Winning leaves Memory cells for the next time this threat appears.
 
 Between phases there is a short pause with one Field Guide line about what just happened in the body.
 
@@ -84,13 +84,14 @@ Every unit is named for its job, using one theme: the body is a city, and the ce
 - The name says the job in one or two plain words.
 - Every cell's loadout tile shows the game name large and the real name small, plus one line on what it really does.
 - The **Field Guide** (in-game codex) unlocks each real cell's entry the first time you use it.
+- **Exception:** Antigen, Lymph node and Memory cell keep their real names in the game, so there is no separate game name to learn for them.
 
 **Sentries** (stationary: placed on open tissue, float in place, fight on their own)
 
 | Game name | Real name | Job in game | Real job |
 | --- | --- | --- | --- |
 | Devourer | Macrophage | Big stationary eater; engulfs enemies and debris that come near | Engulfs microbes and dead cells. "Macrophage" is Greek for "big eater" |
-| Scout | Dendritic cell | Reveals hidden enemies nearby and alerts you; carries a Fingerprint to the Barracks | Samples invaders and presents them to T cells in lymph nodes |
+| Scout | Dendritic cell | Reveals hidden enemies nearby and alerts you; carries an Antigen to the Lymph node | Samples invaders and presents them to T cells in lymph nodes |
 | Siren | Mast cell | Raises the Alarm, which calls in help faster | Releases histamine; drives inflammation and allergies |
 
 **Responders** (active: enter from blood vessels and go where you aim them)
@@ -103,22 +104,20 @@ Every unit is named for its job, using one theme: the body is a city, and the ce
 | Grenadier | Eosinophil | Area damage vs. big parasites | Releases toxic granules against worms |
 | Bouncer | Natural killer cell | Kills any cell hiding its ID badge | Kills cells missing their MHC I "ID" marker |
 | Commander | Helper T cell | Doesn't fight; buffs and speeds up nearby units | Coordinates the immune response with signals |
-| Bounty Hunter | Killer T cell | Aimed at infected cells; kills only those matching its Fingerprint and copies itself on kills | Kills infected cells showing its one target; multiplies when it finds it |
+| Bounty Hunter | Killer T cell | Aimed at infected cells; kills only those matching its Antigen and copies itself on kills | Kills infected cells showing its one target; multiplies when it finds it |
 | Marksman | B cell | Fires Marker darts that slow enemies and make them take extra damage | Makes antibodies that tag and neutralize targets |
 | Armory | Plasma cell | Upgraded Marksman: a stationary dart factory | A B cell turned antibody factory |
 | Peacekeeper | Regulatory T cell | Lowers the Alarm; prevents friendly fire | Calms the response and prevents autoimmunity |
-| Veteran | Memory cell | Carries over between levels; adaptive cells ready from the start | Remembers past enemies; the basis of vaccines |
+| Memory cell | Memory cell | Carries over between levels; adaptive cells ready from the start | Remembers past enemies; the basis of vaccines |
 
 **Terms**
 
 | Game term | Real term |
 | --- | --- |
-| Fingerprint | Antigen |
 | ID badge | MHC |
 | Marker dart | Antibody |
 | Signal | Cytokines |
 | Alarm | Inflammation |
-| Barracks | Lymph node |
 | Academy | Thymus |
 | Heat Wave (spell) | Fever |
 | Chain Reaction (spell) | Complement system |
@@ -146,13 +145,13 @@ The campaign follows your person from childhood to old age. Each chapter is a li
 
 | Stage | Age | Levels (last = boss) | What it teaches | New cells and mechanics |
 | --- | --- | --- | --- | --- |
-| 1. Childhood | 6–12 | Cut → Flu → Broken bone → Chickenpox → Food poisoning → **Rusty nail** (tetanus: a toxin only a vaccine's Veterans can beat) | The three kinds of threat; the body learns; vaccines | Scout, Devourer, Rusher · Barracks and Bounty Hunter · Siren and the Alarm · Patcher, Marksman, Veterans |
+| 1. Childhood | 6–12 | Cut → Flu → Broken bone → Chickenpox → Food poisoning → **Rusty nail** (tetanus: a toxin only a vaccine's Memory cells can beat) | The three kinds of threat; the body learns; vaccines | Scout, Devourer, Rusher · Lymph node and Bounty Hunter · Siren and the Alarm · Patcher, Marksman, Memory cells |
 | 2. Teen years | 13–19 | Hay fever → Asthma (the path narrows) → **Peanut allergy** (a harmless enemy; too much Alarm = anaphylaxis = loss) | Overreacting is the disease | Peacekeeper |
-| 3. Young adult | 20–35 | Flu again (childhood Veterans make it easy) → New flu strain → Traveler's diarrhea → **C. diff** (takes over after antibiotics kill your allies) | Memory, and why flu shots are yearly; not all bacteria are enemies | Friendly microbiome, Antibiotics, Grenadier |
+| 3. Young adult | 20–35 | Flu again (childhood Memory cells make it easy) → New flu strain → Traveler's diarrhea → **C. diff** (takes over after antibiotics kill your allies) | Memory, and why flu shots are yearly; not all bacteria are enemies | Friendly microbiome, Antibiotics, Grenadier |
 | 4. Adulthood | 35–55 | Celiac → Rheumatoid arthritis → Tuberculosis (contain it, can't kill it) → Hepatitis → HIV → **Lupus** | Friendly fire; containment; an enemy that attacks your command | Academy, Bouncer, Commander, Devourer walls |
 | 5. Later life | 55+ | Kidney infection → Cancer (early catch → spread → immunotherapy) → **Shingles** (the childhood chickenpox wakes up) → Transplant → **Sepsis** (finale: the Alarm is the real enemy) | Traitors from inside; sleeper agents; your own response can kill you | Traitor enemies, engineered Bounty Hunters, whole-body map |
 
-**One life, so progress carries forward.** Veterans earned against the childhood Flu make the young-adult reinfection easy. The chickenpox beaten at 8 returns as shingles at 60. Vaccines earned in childhood pre-train one Fingerprint for any later level.
+**One life, so progress carries forward.** Memory cells earned against the childhood Flu make the young-adult reinfection easy. The chickenpox beaten at 8 returns as shingles at 60. Vaccines earned in childhood pre-train one Antigen for any later level.
 
 **Lifestyle events come from the patient profile.** A night out, chronic drinking and cirrhosis are not forced on every player's person. They appear as extra levels when the Alcoholic profile is chosen, and the other profiles add their own events the same way.
 
@@ -164,8 +163,8 @@ There are five difficulties, and each damages a different part of the immune sys
 | --- | --- | --- | --- |
 | Healthy | Nothing | Baseline | Standard Signal and Alarm limits |
 | Smoker | Barriers and lungs | Smoke paralyzes the airways' mucus escalator and weakens lung macrophages; narrowed vessels slow healing | Lung maps: no passive clearing, Devourers eat 30% slower. All maps: Responders take 30% longer to arrive, Patchers work 50% slower |
-| Obese | The alarm system and memory | Fat tissue drives chronic low-grade inflammation; weaker vaccine responses; slower wound healing | Alarm never drops below 25. Veterans 30% weaker. Tissue regenerates 50% slower. Fat-tissue tiles add Alarm over time |
-| Alcoholic | Responders and the gut wall | Neutrophils recruited slower and less effective; lung macrophages weakened; gut wall leaks bacteria | Rushers arrive 2 s late, 1 fewer per deploy. Signal −20%. A "leaky gut" edge spawns extra enemies. Barracks trains 30% slower |
+| Obese | The alarm system and memory | Fat tissue drives chronic low-grade inflammation; weaker vaccine responses; slower wound healing | Alarm never drops below 25. Memory cells 30% weaker. Tissue regenerates 50% slower. Fat-tissue tiles add Alarm over time |
+| Alcoholic | Responders and the gut wall | Neutrophils recruited slower and less effective; lung macrophages weakened; gut wall leaks bacteria | Rushers arrive 2 s late, 1 fewer per deploy. Signal −20%. A "leaky gut" edge spawns extra enemies. Lymph node trains 30% slower |
 | Meth head | Everything, erratically | Skin picking and injection open wounds; needles carry bloodborne infections; dry mouth; sleep loss and malnutrition. Direct immune suppression is shown mostly in animal studies | New breaches open mid-wave. Some enemies spawn directly in the blood lanes. Signal swings between spikes and crashes. All units −10% |
 
 All percentages are first-pass tuning numbers for playtesting.
@@ -210,15 +209,15 @@ Body times below are approximate and compressed into minutes of play.
 
 - **Intro:** "Billy, age 7, catches the flu from a classmate."
 - **Teaches:** viruses hide inside your own cells; the body has to learn a new enemy; memory.
-- **New:** Barracks and Bounty Hunter. The loadout shows Bounty Hunter in a 4th slot, greyed out as "needs training".
-- **Map:** the airway lining: rows of airway cells (tiles) across the middle; virus drifts in from the top; the Barracks (a lymph node in the neck) sits at the right edge.
+- **New:** Lymph node and Bounty Hunter. The loadout shows Bounty Hunter in a 4th slot, greyed out as "needs training".
+- **Map:** the airway lining: rows of airway cells (tiles) across the middle; virus drifts in from the top; the Lymph node (in the neck) sits at the right edge.
 
 | Phase | Body time | In the body | In the game |
 | --- | --- | --- | --- |
 | 1. Silent spread | Days 0–2 | Virus lands in the airway and slips into cells. No symptoms yet | 8 viruses drift in, visible only near Scouts. Devourers catch a few free viruses, but most get inside airway cells |
-| 2. Fighting blind | Days 1–4 | Infected cells burst out new virus. Fever and aches start. A dendritic cell carries a sample to the lymph node | Infected cells burst after 12 s, releasing 4 viruses each (12 more arrive too). Each burst costs a little Host Health: Billy feels sick. A Scout leaves to carry the Fingerprint and Barracks training starts (40 s). Innate cells can only slow the spread |
+| 2. Fighting blind | Days 1–4 | Infected cells burst out new virus. Fever and aches start. A dendritic cell carries a sample to the lymph node | Infected cells burst after 12 s, releasing 4 viruses each (12 more arrive too). Each burst costs a little Host Health: Billy feels sick. A Scout leaves to carry the Antigen and Lymph node training starts (40 s). Innate cells can only slow the spread |
 | 3. The counterattack | Days 5–8 | Killer T cells arrive, multiply and destroy infected cells | Bounty Hunter unlocks. Aim them at infected cells; each kill copies the Hunter. A last surge of 16 viruses |
-| 4. Mop-up and memory | Days 8–14 | Dead airway cells are cleared. Bacteria may exploit the damaged lining. Memory cells form | Dead-cell Debris, plus a few Bacteria on damaged tiles (a secondary infection) for Rushers and Devourers. Winning awards a Flu Veteran for later in life |
+| 4. Mop-up and memory | Days 8–14 | Dead airway cells are cleared. Bacteria may exploit the damaged lining. Memory cells form | Dead-cell Debris, plus a few Bacteria on damaged tiles (a secondary infection) for Rushers and Devourers. Winning awards a Flu Memory cell for later in life |
 
 ### Level 3: Broken bone (about 6 minutes)
 
@@ -239,7 +238,7 @@ Body times below are approximate and compressed into minutes of play.
 
 | Cell | Kind | Cost (Signal) | HP | Attack | Reach | Speed (tiles/s) | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Scout | Sentry | 3 | 80 | none | sees 3 tiles | drifts; 1 while carrying | Reveals enemies; leaves automatically to carry a new Fingerprint |
+| Scout | Sentry | 3 | 80 | none | sees 3 tiles | drifts; 1 while carrying | Reveals enemies; leaves automatically to carry a new Antigen |
 | Devourer | Sentry | 4 | 300 | 12 damage/s; eats a Bacterium or Debris every 1.5 s | 1 tile | drifts | Hits anything in reach, revealed or not |
 | Siren | Sentry | 3 | 120 | none | 3 tiles | drifts | +2 Alarm/s while enemies or Debris are in range |
 | Rusher | Responder | 2 | 40 each, 3 per deploy | 10 damage/s | melee | 2.5 | Dies after 3 kills or 20 s |
@@ -271,7 +270,7 @@ The look is a stained microscope slide with personality. Cells are soft rounded 
 - **Silhouette first.** Every unit has a distinct outline, recognizable at 24 px in grayscale: Devourer = big blob with pseudopods, Rusher = small bean with a lobed nucleus, Scout = star with long arms, Siren = round with a granule halo, Marksman = oval with a dart launcher, Patcher = flat disc, Bounty Hunter = spiky oval with one big eye.
 - **Friend vs. enemy by color family.** Your cells are pale with purple nuclei, like a real blood smear. Enemies are acid green, yellow and orange, so they read as "gross" and never blend in.
 - **Size = importance.** Bosses and Sentries are large, swarm units small.
-- **Status on the unit.** Tagged enemies glow with a marker ring; enemies carrying a known Fingerprint show a small icon.
+- **Status on the unit.** Tagged enemies glow with a marker ring; enemies carrying a known Antigen show a small icon.
 - **Never color alone.** Every color meaning also has a shape or icon, for color-blind players.
 
 **Alarm is shown on the tissue, not just a meter.** As Alarm rises, the background swells redder and pulses. Players see inflammation, which teaches what it is.
@@ -316,7 +315,7 @@ The slice is built as a zero-dependency canvas game in its own repo, `neiloza/Im
 | Module | Job | Rule |
 | --- | --- | --- |
 | `data/` (units, enemies, levels) | Every number in this doc | Tuning never touches logic |
-| `sim/` | The whole game state and rules: movement, targeting, combat, Signal, Alarm, Barracks | Pure and deterministic: fixed 20 ticks per second, seeded randomness, no DOM. Same inputs always give the same result |
+| `sim/` | The whole game state and rules: movement, targeting, combat, Signal, Alarm, Lymph node | Pure and deterministic: fixed 20 ticks per second, seeded randomness, no DOM. Same inputs always give the same result |
 | `render/` | Draws the sim state to canvas at 60 fps, smoothing between ticks | Reads state, never changes it |
 | `ui/` | Loadout screen, deploy tray, meters, selecting and aiming units | Turns taps into commands (`deploy`, `orderAttack`) for the sim |
 | `main.js` | Game loop, name-your-person screen, level select, saved progress in `localStorage` | Thin glue |
@@ -325,7 +324,7 @@ The slice is built as a zero-dependency canvas game in its own repo, `neiloza/Im
 
 - Bacteria split on time and stop after 2 generations.
 - Alarm damage and cytokine storm math match this doc.
-- Bounty Hunter unlocks exactly when Barracks training finishes, and copies stop at the cap.
+- Bounty Hunter unlocks exactly when Lymph node training finishes, and copies stop at the cap.
 - Hidden enemies can't be targeted until a Scout reveals them; the Healing bar fills at the right rate in each Alarm band.
 - Phases advance in order with the spawns the level data lists. A scripted bot beats each slice level on 1 star, so no level ships unwinnable.
 
@@ -337,7 +336,7 @@ The slice is built as a zero-dependency canvas game in its own repo, `neiloza/Im
 
 - [ ] Final title, after a trademark and app-store name check.
 - [ ] Deploy limit: Signal (an energy that refills) is kept from the earlier design. Alternatives are a fixed cell budget per level, or a cooldown per cell type.
-- [ ] Scouts carrying a Fingerprint: do they leave automatically (slice default), or does the player send them, trading detection now for specialists later?
+- [ ] Scouts carrying an Antigen: do they leave automatically (slice default), or does the player send them, trading detection now for specialists later?
 - [ ] Can players move Sentries once placed? The slice says no.
 - [ ] Your person: name only, or also appearance? Level intro text avoids pronouns, so the name alone works.
 - [ ] Difficulty labels: keep "Alcoholic / Smoker / Obese / Meth head", or use clinical labels. Must be settled before store copy and art. App stores rate drug and alcohol references higher regardless of labels (check the exact rating tiers).

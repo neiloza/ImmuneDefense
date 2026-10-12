@@ -27,7 +27,7 @@ const skills = ["idle", "casual", "good", "reckless"];
 
 export function loadoutFor(level) {
   // Bots bring the level's required cells, then its new ones, then whatever
-  // else fits — skipping Bounty Hunters where there is no Barracks to train
+  // else fits — skipping Bounty Hunters where there is no Lymph node to train
   // them. The same shape a sensible player picks on the loadout screen.
   const pick = [...level.requiredCells];
   const add = (c) => { if (pick.length < level.slots && !pick.includes(c)) pick.push(c); };

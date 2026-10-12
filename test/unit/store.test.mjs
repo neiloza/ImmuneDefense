@@ -57,7 +57,7 @@ test("export round-trips; another app's file and a future version are refused", 
   assert.equal(importState("{ not json"), null);
 });
 
-test("results keep the best, count every play, and award a Veteran once", () => {
+test("results keep the best, count every play, and award a Memory cell once", () => {
   const s = defaultState();
   recordResult(s, "flu", { won: true, stars: 2, host: 60, rewards: { veteran: "flu" } });
   const first = s.veterans.flu;
@@ -67,7 +67,7 @@ test("results keep the best, count every play, and award a Veteran once", () => 
   assert.equal(s.progress.flu.best, 60);
   assert.equal(s.progress.flu.plays, 3);
   assert.equal(s.progress.flu.wins, 2);
-  assert.equal(s.veterans.flu, first, "the Veteran keeps its first date");
+  assert.equal(s.veterans.flu, first, "the Memory cell keeps its first date");
 });
 
 test("levels unlock in order, and the tester switch opens them all", () => {

@@ -76,7 +76,7 @@ Built and working in a desktop Chromium with a phone viewport:
   as aimed Responders), **five threats** (bacterium, flu virus, infected
   airway cell, debris, pus), neutral Bone Builders.
 - **Mechanics:** hidden threats until a Scout reveals them; Scouts carrying
-  the virus's Fingerprint to the Barracks, training, then Bounty Hunters that
+  the virus's Antigen to the Lymph node, training, then Bounty Hunters that
   copy themselves on kills; bacteria that split and latch onto cells; the
   Alarm meter with its 20–60 healing band and cytokine storm; Healing bars;
   retiring a Sentry.
@@ -172,9 +172,9 @@ Ordered by leverage. Everything here an agent can do alone.
    retune `js/data/` and re-run `npm run balance`; keep `npm test` green.
 2. **The next Childhood levels** — Chickenpox, Food poisoning, Rusty nail
    (tetanus) — which bring the Patcher, Marksman, encapsulated bacteria and
-   Veterans (docs/DESIGN.md, Campaign). The Veteran reward already exists in
+   Memory cells (docs/DESIGN.md, Campaign). The Memory cell reward already exists in
    the save; `createGame(level, { known: [...] })` already starts a level with
-   a Fingerprint trained.
+   an Antigen trained.
 3. **Haptics on Android** (`navigator.vibrate` on deploy and on a leak), off
    with the sound switch.
 4. **A GameHub hub card** pointing at the subdomain, once item 1 below
